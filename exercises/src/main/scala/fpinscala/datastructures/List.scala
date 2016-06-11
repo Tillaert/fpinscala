@@ -70,21 +70,44 @@ object List {
 
   def drop[A](l: List[A], n: Int): List[A] =
     l match {
-      case Cons(_, t) =>
-        if (n > 0)
-          drop(t, n - 1)
-        else
-          l
+      case Cons(_, t) if (n > 0) => drop(t, n - 1)
+      case _ => l
+    }
+
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] =
+    l match {
+      case Cons(h, t) if (f(h)) => dropWhile(t, f)
+      case _ => l
+    }
+
+
+  def init[A](l: List[A]): List[A] =
+    l match {
+      case Cons(h, Nil) => Nil
+      case Cons(h, t) => Cons(h, init(t))
       case _ => Nil
     }
 
-  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = sys.error("todo")
 
-  def init[A](l: List[A]): List[A] = sys.error("todo")
+  def length[A](l: List[A]): Int =
+    foldRight(l, 0)((_, n) => n + 1)
 
-  def length[A](l: List[A]): Int = sys.error("todo")
+  def foldLeft[A, B](l: List[A], z: B)(f: (B, A) => B): B =
+    l match {
+      case Nil => z
+      case Cons(h, t) => foldLeft(t, f(z, h))(f)
+    }
 
-  def foldLeft[A, B](l: List[A], z: B)(f: (B, A) => B): B = sys.error("todo")
+  def sumViaFoldLeft(l: List[Int]) = foldLeft(l, 0)(_ + _)
+
+  def productViaFoldLeft(l: List[Int]) = foldLeft(l, 1)(_ * _)
+
+  def lengthViaFoldLeft[A](l: List[A]) = foldLeft[A, Int](l, 0)((l, _) => l + 1)
+
+  def reverse[A](l: List[A]) = foldLeft(l, Nil: List[A])((l, v) => Cons(v, l))
+
+  def foldRightViaFoldLeft[A, B](as: List[A], z: B)(f: (A, B) => B): B =
+    foldLeft(reverse(as), z)( (a,b) => f(b,a))
 
   def map[A, B](l: List[A])(f: A => B): List[B] = sys.error("todo")
 
