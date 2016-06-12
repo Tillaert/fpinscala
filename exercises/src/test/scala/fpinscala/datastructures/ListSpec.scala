@@ -80,40 +80,132 @@ class ListSpec extends FlatSpec with Matchers {
   }
 
   "Exercise 3.10" should "foldLeft" in {
-    val l = List(1,20,300,4000)
+    val l = List(1, 20, 300, 4000)
 
-    assert( List.foldLeft(l,50000)(_+_) == 54321 )
+    assert(List.foldLeft(l, 50000)(_ + _) == 54321)
   }
 
   "Exercise 3.11" should "sum via foldleft" in {
-    val l = List(1,20,300,4000)
+    val l = List(1, 20, 300, 4000)
 
-    assert( List.sumViaFoldLeft(l) == 4321 )
-    assert( List.sumViaFoldLeft(Nil) == 0 )
+    assert(List.sumViaFoldLeft(l) == 4321)
+    assert(List.sumViaFoldLeft(Nil) == 0)
   }
 
   "Exercise 3.11" should "product via foldleft" in {
-    val l = List(1,2,3,4)
+    val l = List(1, 2, 3, 4)
 
-    assert( List.productViaFoldLeft(l) == 24 )
-    assert( List.productViaFoldLeft(Nil) == 1 )
+    assert(List.productViaFoldLeft(l) == 24)
+    assert(List.productViaFoldLeft(Nil) == 1)
   }
 
   "Exercise 3.11" should "length via foldleft" in {
-    val l = List(1,2,3,4)
+    val l = List(1, 2, 3, 4)
 
-    assert( List.lengthViaFoldLeft(l) == 4 )
-    assert( List.lengthViaFoldLeft(Nil) == 0 )
+    assert(List.lengthViaFoldLeft(l) == 4)
+    assert(List.lengthViaFoldLeft(Nil) == 0)
   }
 
   "Exercise 3.12" should "reverse" in {
-    assert( List.reverse(Nil) == Nil)
-    assert( List.reverse(List(1,2,3,4)) == List(4,3,2,1))
+    assert(List.reverse(Nil) == Nil)
+    assert(List.reverse(List(1, 2, 3, 4)) == List(4, 3, 2, 1))
   }
 
   "Exercise 3.13" should "foldRight as foldLeft" in {
-    val l = List(1,2,3,4,5)
+    val l = List(1, 2, 3, 4, 5)
 
-    assert( List.foldRightViaFoldLeft(l, Nil:List[Int])(Cons(_,_)) == l )
+    assert(List.foldRightViaFoldLeft(l, Nil: List[Int])(Cons(_, _)) == l)
+  }
+
+  "Exercise 3.14" should "append" in {
+    val l = List(1, 2, 3)
+    val k = List(4, 5, 6)
+
+    assert(List.appendViaFolding(l, k) == List(1, 2, 3, 4, 5, 6))
+  }
+
+  "Exercise 3.15" should "flatten" in {
+    val l = List(List(1, 2), List(3))
+
+    assert(List.flatten(l) == List(1, 2, 3))
+  }
+
+  "Exercise 3.16" should "plusone" in {
+    val l = List(4, 5, 6)
+
+    assert(List.plusone(l) == List(5, 6, 7))
+  }
+
+  "Exercise 3.17" should "list of double to string" in {
+    val l = List(1.2, 3.4, 5.6)
+
+    assert(List.mapToString(l) == List("1.2", "3.4", "5.6"))
+    assert(List.mapToString(Nil) == Nil)
+  }
+
+  "Exercise 3.18" should "map" in {
+    val l = List(1, 2, 3)
+
+    assert(List.map(l)(_.toString) == List("1", "2", "3"))
+    assert(List.map(Nil)(_.toString) == Nil)
+  }
+
+  "Exercise 3.19" should "filter" in {
+    val l = List(true, true, false, true, false)
+
+    assert(List.filter(l)(x => x) == List(true, true, true))
+  }
+
+  "Exercise 3.20" should "flatmap" in {
+    assert(List.flatMap(List(1, 2, 3))(i => List(i, i)) == List(1, 1, 2, 2, 3, 3))
+  }
+
+  "Exercise 3.21" should "filter using flatmap" in {
+    val l = List(true, true, false, true, false)
+
+    assert(List.filterViaFlatmap(l)(x => x) == List(true, true, true))
+  }
+
+  "Exercise 3.22" should "add two lists" in {
+    val l = List(1, 2, 3)
+    val r = List(4, 5, 6)
+
+    assert(List.addLists(l, r) == List(5, 7, 9))
+    assert(List.addLists(l, Nil) == Nil)
+    assert(List.addLists(Nil, r) == Nil)
+  }
+
+  "Exersise 3.23" should "zipWith" in {
+    val l = List(true, false, false, true)
+    val r = List(true, true, false, false)
+    val l_or_r = List(true, true, false, true)
+
+    def or(x: Boolean, y: Boolean) = x || y
+
+    assert(List.zipWith(l, r)(or) == l_or_r)
+
+    val intList = List(1, 2, 3)
+    val doubleList = List(1.0, 2.0, 3.0)
+
+    def prodString(i: Int, d: Double): String =
+      (i * d).toString
+
+    assert(List.zipWith(intList, doubleList)(prodString) == List("1.0", "4.0", "9.0"))
+  }
+
+  "Exercise 3.24" should "hasSubsequence" in {
+    val l = List(1, 2, 3, 4)
+
+    assert( List.hasSubsequence(l, List(1,2)) == true )
+    assert( List.hasSubsequence(l, List(2,3)) == true )
+    assert( List.hasSubsequence(l, List(3,4)) == true )
+    assert( List.hasSubsequence(l, List(2,1)) == false )
+    assert( List.hasSubsequence(l, Nil) == true )
+
+
+
+
   }
 }
+
+

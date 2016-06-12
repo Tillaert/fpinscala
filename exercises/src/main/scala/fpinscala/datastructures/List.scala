@@ -107,9 +107,59 @@ object List {
   def reverse[A](l: List[A]) = foldLeft(l, Nil: List[A])((l, v) => Cons(v, l))
 
   def foldRightViaFoldLeft[A, B](as: List[A], z: B)(f: (A, B) => B): B =
-    foldLeft(reverse(as), z)( (a,b) => f(b,a))
+    foldLeft(reverse(as), z)((a, b) => f(b, a))
 
-  def map[A, B](l: List[A])(f: A => B): List[B] = sys.error("todo")
+  def map[A, B](as: List[A])(f: A => B): List[B] =
+    List.foldRight(as, Nil: List[B])( (h,t) => Cons(f(h),t))
+
+  def appendViaFolding[A](l: List[A], k: List[A]): List[A] =
+    List.foldRight(l, k)(Cons(_, _))
+
+  def flatten[A](l: List[List[A]]): List[A] =
+    List.foldRight(l, Nil: List[A])(append)
+
+  def plusone(l: List[Int]): List[Int] =
+    List.foldRight(l, Nil: List[Int])((h, t) => Cons(h + 1, t))
+
+  def mapToString(l: List[Double]) =
+    List.foldRight(l, Nil: List[String])((h, t) => Cons(h.toString, t))
+
+  def filter[A](l: List[A])(f: A => Boolean): List[A] =
+    List.foldRight(l, Nil: List[A])( (h,t) => if (f(h)) Cons(h,t) else t )
+
+  def flatMap[A,B](as:List[A])(f: A => List[B]): List[B] =
+    List.flatten(List.map(as)(f))
+
+  def filterViaFlatmap[A](l: List[A])(f: A => Boolean): List[A] =
+    List.flatMap(l)(i => if (f(i)) List(i) else Nil )
+
+  def addLists(l: List[Int], r:List[Int]) : List[Int] =
+    (l,r) match {
+      case (Cons(hl, tl), Cons(hr, tr)) => Cons(hl + hr, addLists(tl, tr))
+      case _ => Nil
+    }
+
+  def zipWith[A,B,C]( l: List[A], r: List[B] ) (f: (A,B) => C ): List[C] =
+    (l,r) match {
+      case (Cons(hl, tl), Cons(hr, tr)) => Cons(f(hl,hr), zipWith(tl,tr)(f))
+      case _ => Nil
+    }
+
+  @annotation.tailrec
+  def startsWith[A](l:List[A], sub:List[A]):Boolean =
+    (l, sub) match {
+      case (Cons(hl,_), Cons(hr,_)) if(hl != hr) => false
+      case (Cons(_,tl), Cons(_,tr)) => startsWith(tl,tr)
+      case _ => true
+    }
+
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean =
+    sup match {
+      case Nil => false
+      case Cons(_,t) => startsWith(sup, sub) || hasSubsequence(t, sub)
+    }
+
+
 
 
 }
