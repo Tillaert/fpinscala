@@ -44,39 +44,67 @@ class OptionSpec extends FlatSpec with Matchers {
     val s = Some(1)
     val n = None
 
-    assert(s.filter( _ => true ) == s )
-    assert(s.filter( _ => false ) == n )
-    assert(n.filter( _ => true ) == n )
-    assert(n.filter( _ => false ) == n )
-    assert(s.filter( x => x == 1 ) == s )
+    assert(s.filter(_ => true) == s)
+    assert(s.filter(_ => false) == n)
+    assert(n.filter(_ => true) == n)
+    assert(n.filter(_ => false) == n)
+    assert(s.filter(x => x == 1) == s)
   }
 
   "Exercise 4.2" should "variance" in {
-    val s = List(1.0,-1.0)
+    val s = List(1.0, -1.0)
 
-    assert( Option.variance( s ) == Some(1.0))
-    assert( Option.variance( List(0.0) ) == Some(0.0) )
-    assert( Option.variance( Nil ) == None )
+    assert(Option.variance(s) == Some(1.0))
+    assert(Option.variance(List(0.0)) == Some(0.0))
+    assert(Option.variance(Nil) == None)
   }
 
   "Exercise 4.3" should "map2" in {
-    assert( Option.map2(Some(1), Some(2))(_ + _ ) == Some(3))
-    assert( Option.map2(None, Some(2))( (a,b) => b ) == None)
-    assert( Option.map2(Some(1), None)( (a,b) => a ) == None)
-    assert( Option.map2(None, None)( (a,b) => 1 ) == None)
-    assert( Option.map2(Some(1), Some(2))((_,_)) == Some((1,2)))
+    assert(Option.map2(Some(1), Some(2))(_ + _) == Some(3))
+    assert(Option.map2(None, Some(2))((a, b) => b) == None)
+    assert(Option.map2(Some(1), None)((a, b) => a) == None)
+    assert(Option.map2(None, None)((a, b) => 1) == None)
+    assert(Option.map2(Some(1), Some(2))((_, _)) == Some((1, 2)))
   }
 
   "Exercise 4.4" should "sequence" in {
     val l = List(Some(1), Some(2), Some(3))
-    val r = Some(List(1,2,3))
+    val r = Some(List(1, 2, 3))
 
-    assert( Option.sequence(l) == r )
+    assert(Option.sequence(l) == r)
 
-    val n = List(Some(1),Some(2), None)
+    val n = List(Some(1), Some(2), None)
 
-    assert( Option.sequence(n) == None )
+    assert(Option.sequence(n) == None)
 
-    assert( Option.sequence(Nil) == Some(Nil) )
+    assert(Option.sequence(Nil) == Some(Nil))
+  }
+
+  "Exercise 4.5" should "traverse" in {
+    val l = List(1, 2, 3, 4)
+
+    val f = (x: Int) =>
+      if (x <= 2)
+        Some(x)
+      else
+        None
+
+    assert(Option.traverse(l)(f) == None)
+    assert(Option.traverse(l)(x => Some(x)) == Some(List(1, 2, 3, 4)))
+
+  }
+
+  "Exercise 4.5" should "sequenceViaTraverse" in {
+    val l = List(Some(1), Some(2), Some(3))
+    val r = Some(List(1, 2, 3))
+
+    assert(Option.sequenceViaTraverse(l) == r)
+
+    val n = List(Some(1), Some(2), None)
+
+    assert(Option.sequenceViaTraverse(n) == None)
+
+    assert(Option.sequenceViaTraverse(Nil) == Some(Nil))
   }
 }
+

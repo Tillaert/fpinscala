@@ -71,10 +71,15 @@ object Option {
     for {
       v <- a
       w <- b
-    } yield (f(v, w))
+    } yield f(v, w)
 
   def sequence[A](a: List[Option[A]]): Option[List[A]] =
     a.foldRight[Option[List[A]]](Some(Nil))((a, b) => map2(a, b)(_ :: _))
 
-  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = sys.error("todo")
+  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] =
+    a.foldRight[Option[List[B]]](Some(Nil))((v,l) => map2( f(v), l)(_::_))
+
+  def sequenceViaTraverse[A](a: List[Option[A]]): Option[List[A]] =
+    traverse(a)(x => x)
+
 }
