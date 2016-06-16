@@ -47,4 +47,28 @@ class EitherSpec extends FlatSpec with Matchers {
     assert(ra.map2(lb)(f) == lb)
     assert(ra.map2(rb)((_, _) => lb) == Right(lb))
   }
+
+  "Exercise 4.7" should "sequence" in {
+    val l = List(Left(0), Left(1))
+    val r = List(Right(0), Right(1))
+    val lr = List(Left(0), Right(1))
+    val rl = List(Right(0), Left(1))
+
+    assert(Either.sequence(l) == Left(0))
+    assert(Either.sequence(r) == Right(List(0, 1)))
+    assert(Either.sequence(lr) == Left(0))
+    assert(Either.sequence(rl) == Left(1))
+  }
+
+  "Exercise 4.7" should "traverse" in {
+    val l = List(Left(0), Left(1))
+    val r = List(Right(0), Right(1))
+    val lr = List(Left(0), Right(1))
+    val rl = List(Right(0), Left(1))
+
+    assert(Either.traverse(l)(x => x.map(_.toString)) == Left(0))
+    assert(Either.traverse(r)(x => x.map(_.toString)) == Right(List("0", "1")))
+    assert(Either.traverse(lr)(x => x.map(_.toString)) == Left(0))
+    assert(Either.traverse(rl)(x => x.map(_.toString)) == Left(1))
+  }
 }
