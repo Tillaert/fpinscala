@@ -20,11 +20,20 @@ trait Stream[+A] {
   }
 
   def toList: List[A] =
-    this.foldRight(Nil:List[A])( (v,l) => v :: l )
+    this.foldRight(Nil: List[A])((v, l) => v :: l)
 
-  def take(n: Int): Stream[A] = sys.error("todo")
+  def take(n: Int): Stream[A] =
+    this match {
+      case Cons(h, t) if n > 1 => cons(h(), t().take(n - 1))
+      case Cons(h, _) if n == 1 => cons(h(), empty)
+      case _ => empty
+    }
 
-  def drop(n: Int): Stream[A] = sys.error("todo")
+  def drop(n: Int): Stream[A] =
+    this match {
+      case Cons(h, t) if n > 0 => t().drop(n - 1)
+      case _ => this
+    }
 
   def takeWhile(p: A => Boolean): Stream[A] = sys.error("todo")
 

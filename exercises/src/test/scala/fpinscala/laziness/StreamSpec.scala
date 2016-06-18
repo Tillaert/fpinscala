@@ -15,4 +15,19 @@ class StreamSpec extends FlatSpec with Matchers{
     assert( s.toList == Nil )
   }
 
+  "Exercise 5.2" should "take(n)" in {
+    assert( Stream(1,2,3,4).take(0) == Empty)
+    assert( Stream(1,2,3,4).take(2).toList == List(1,2))
+    assert( Stream(1,2,3,4).take(4).toList == List(1,2,3,4) )
+    assert( Empty.take(1) == Empty )
+    assert( Stream(1,2,3,4).take(5).toList == List(1,2,3,4))
+  }
+
+  "Exercise 5.2" should "drop(n)" in {
+    assert( Stream(1,2,3,4).drop(0).toList == List(1,2,3,4))
+    assert( Stream(1,2,3,4).drop(2).toList == List(3,4))
+    assert( Stream(1,2,3,4).drop(4) == Empty )
+    assert( Empty.drop(1) == Empty )
+    assert( Stream(1,2,3,4).drop(5) == Empty)
+  }
 }
