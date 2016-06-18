@@ -30,4 +30,11 @@ class StreamSpec extends FlatSpec with Matchers{
     assert( Empty.drop(1) == Empty )
     assert( Stream(1,2,3,4).drop(5) == Empty)
   }
+
+  "Exercise 5.3" should "takeWhile" in {
+    assert( Stream(1,1,2,2).takeWhile( _ == 1 ).toList == List(1,1))
+    assert( Empty.takeWhile( _ => true ) == Empty )
+    assert( Stream(2,2,2,2).takeWhile( _ == 1 ).toList == Nil )
+    assert( Stream(1,1,1,1).takeWhile( _ == 1 ).toList == List(1,1,1,1))
+  }
 }
