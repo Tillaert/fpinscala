@@ -37,4 +37,18 @@ class StreamSpec extends FlatSpec with Matchers{
     assert( Stream(2,2,2,2).takeWhile( _ == 1 ).toList == Nil )
     assert( Stream(1,1,1,1).takeWhile( _ == 1 ).toList == List(1,1,1,1))
   }
+
+  "Exercise 5.4" should "forAll" in {
+    assert( !Stream(1,1,1,2,1).forAll( _ == 1) )
+    assert( Stream(1,1,1,1,1).forAll( _ == 1))
+    assert( Empty.forAll( _ => false ))
+  }
+
+  "Exercise 5.5" should "takeWhileViaFoldRight" in {
+    assert( Stream(1,1,2,2).takeWhileViaFoldRight( _ == 1 ).toList == List(1,1))
+    assert( Empty.takeWhileViaFoldRight( _ => true ) == Empty )
+    assert( Stream(2,2,2,2).takeWhileViaFoldRight( _ == 1 ).toList == Nil )
+    assert( Stream(1,1,1,1).takeWhileViaFoldRight( _ == 1 ).toList == List(1,1,1,1))
+  }
+
 }

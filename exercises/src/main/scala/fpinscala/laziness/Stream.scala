@@ -41,7 +41,11 @@ trait Stream[+A] {
       case _ => empty
     }
 
-  def forAll(p: A => Boolean): Boolean = sys.error("todo")
+  def forAll(p: A => Boolean): Boolean =
+    foldRight(true)((a,b) => p(a) && b)
+
+  def takeWhileViaFoldRight(p: A => Boolean): Stream[A] =
+    foldRight(empty:Stream[A])((a,b) => if (p(a))cons(a,b) else empty )
 
   def headOption: Option[A] = sys.error("todo")
 
