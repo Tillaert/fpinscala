@@ -100,4 +100,25 @@ class StreamSpec extends FlatSpec with Matchers {
   "Exercise 5.11" should "unfold" in {
     assert(Stream.unfold(7)( x => Some(x,x+1)).take(4).toList == List(7,8,9,10))
   }
+
+  "Exercise 5.12" should "fibsViaUnfold" in {
+    assert(Stream.fibsViaUnfold.take(7).toList == List(0, 1, 1, 2, 3, 5, 8))
+  }
+
+  "Exercise 5.12" should "fromViaUnfold" in {
+    assert(Stream.fromViaUnfold(10).take(2).toList == List(10, 11))
+    assert(Stream.fromViaUnfold(100).take(4).toList == List(100, 101, 102, 103))
+    assert(Stream.fromViaUnfold(-10).take(3).toList == List(-10, -9, -8))
+  }
+
+  "Exercise 5.12" should "constantViaUnfold" in {
+    assert(Stream.constantViaUnfold(5).take(4).toList == List(5, 5, 5, 5))
+    assert(Stream.constantViaUnfold(1).map(_ * 10).take(10).toList == List(10, 10, 10, 10, 10, 10, 10, 10, 10, 10))
+
+  }
+
+  "Exercise 5.12" should "onesViaUnfold" in {
+    assert(Stream.onesViaUnfold.take(3).toList == List(1,1,1))
+  }
+
 }

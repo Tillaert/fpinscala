@@ -90,14 +90,26 @@ object Stream {
 
   def fibs: Stream[Int] = {
     def go(n1: Int, n2: Int): Stream[Int] =
-      Stream.cons(n1, go(n2, n1 + n2 ))
+      Stream.cons(n1, go(n2, n1 + n2))
 
-    go(0,1)
+    go(0, 1)
   }
 
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] =
     f(z) match {
-      case Some((v,s)) => Stream.cons(v,unfold(s)(f))
+      case Some((v, s)) => Stream.cons(v, unfold(s)(f))
       case _ => empty
     }
+
+  def fibsViaUnfold: Stream[Int] =
+    unfold[Int, (Int, Int)](0, 1) { case (n1, n2) => Some((n1, (n2, n1 + n2))) }
+
+  def fromViaUnfold(n: Int): Stream[Int] =
+    unfold[Int, Int](n)(v => Some(v, v + 1))
+
+  def constantViaUnfold(n: Int): Stream[Int] =
+    unfold[Int, Int](n)(_ => Some(n,n))
+
+  def onesViaUnfold: Stream[Int] =
+    unfold[Int, Int](1)(_ => Some(1,1))
 }
