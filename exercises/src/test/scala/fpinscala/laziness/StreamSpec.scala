@@ -64,21 +64,26 @@ class StreamSpec extends FlatSpec with Matchers {
 
   "Exercise 5.7" should "filter" in {
     assert(Stream(1, 2, 3, 4).filter(_ < 3).toList == List(1, 2))
-    assert(Empty.filter( _ => true) == Empty)
-    assert(Stream(1, 2, 3, 4).filter( _ => false).toList == Nil)
+    assert(Empty.filter(_ => true) == Empty)
+    assert(Stream(1, 2, 3, 4).filter(_ => false).toList == Nil)
   }
 
 
   "Exercise 5.7" should "append" in {
     assert(Stream(1, 2).append(Stream(3, 4)).toList == List(1, 2, 3, 4))
-    assert(Stream().append( Stream(3, 4)).toList == List(3,4))
-    assert(Stream(1,2).append(Empty).toList == List(1,2))
+    assert(Stream().append(Stream(3, 4)).toList == List(3, 4))
+    assert(Stream(1, 2).append(Empty).toList == List(1, 2))
     assert(Empty.append(Empty).toList == Nil)
   }
 
 
   "Exercise 5.7" should "flatMap" in {
-    assert(Stream(1,2).flatMap( x => Stream(x,x)).toList == List(1,1,2,2))
-    assert(Empty.flatMap( _ => Stream(1)).toList == Nil )
+    assert(Stream(1, 2).flatMap(x => Stream(x, x)).toList == List(1, 1, 2, 2))
+    assert(Empty.flatMap(_ => Stream(1)).toList == Nil)
+  }
+
+  "Exercise 5.8" should "constant" in {
+    assert(Stream.constant(5).take(4).toList == List(5, 5, 5, 5))
+    assert(Stream.constant(1).map(_ * 10).take(10).toList == List(10, 10, 10, 10, 10, 10, 10, 10, 10, 10))
   }
 }
