@@ -86,4 +86,10 @@ class StreamSpec extends FlatSpec with Matchers {
     assert(Stream.constant(5).take(4).toList == List(5, 5, 5, 5))
     assert(Stream.constant(1).map(_ * 10).take(10).toList == List(10, 10, 10, 10, 10, 10, 10, 10, 10, 10))
   }
+
+  "Exercise 5.9" should "from" in {
+    assert(Stream.from(10).take(2).toList == List(10, 11))
+    assert(Stream.from(100).take(4).toList == List(100, 101, 102, 103))
+    assert(Stream.from(-10).take(3).toList == List(-10, -9, -8))
+  }
 }
