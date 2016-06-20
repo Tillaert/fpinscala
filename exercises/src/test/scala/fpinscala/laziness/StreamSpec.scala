@@ -96,4 +96,8 @@ class StreamSpec extends FlatSpec with Matchers {
   "Exercise 5.10" should "fibs" in {
     assert(Stream.fibs.take(7).toList == List(0, 1, 1, 2, 3, 5, 8))
   }
+
+  "Exercise 5.11" should "unfold" in {
+    assert(Stream.unfold(7)( x => Some(x,x+1)).take(4).toList == List(7,8,9,10))
+  }
 }
