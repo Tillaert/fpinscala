@@ -92,4 +92,8 @@ class StreamSpec extends FlatSpec with Matchers {
     assert(Stream.from(100).take(4).toList == List(100, 101, 102, 103))
     assert(Stream.from(-10).take(3).toList == List(-10, -9, -8))
   }
+
+  "Exercise 5.10" should "fibs" in {
+    assert(Stream.fibs.take(7).toList == List(0, 1, 1, 2, 3, 5, 8))
+  }
 }
