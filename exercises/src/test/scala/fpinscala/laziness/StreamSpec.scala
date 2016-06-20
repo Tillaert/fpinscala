@@ -51,4 +51,9 @@ class StreamSpec extends FlatSpec with Matchers{
     assert( Stream(1,1,1,1).takeWhileViaFoldRight( _ == 1 ).toList == List(1,1,1,1))
   }
 
+  "Exercise 5.6" should "headOption" in {
+    assert( Stream(1,2,3,4).headOption contains 1 )
+    assert( Stream(2).headOption contains 2 )
+    assert( Empty.headOption.isEmpty )
+  }
 }
