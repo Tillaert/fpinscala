@@ -98,7 +98,7 @@ class StreamSpec extends FlatSpec with Matchers {
   }
 
   "Exercise 5.11" should "unfold" in {
-    assert(Stream.unfold(7)( x => Some(x,x+1)).take(4).toList == List(7,8,9,10))
+    assert(Stream.unfold(7)(x => Some(x, x + 1)).take(4).toList == List(7, 8, 9, 10))
   }
 
   "Exercise 5.12" should "fibsViaUnfold" in {
@@ -118,7 +118,45 @@ class StreamSpec extends FlatSpec with Matchers {
   }
 
   "Exercise 5.12" should "onesViaUnfold" in {
-    assert(Stream.onesViaUnfold.take(3).toList == List(1,1,1))
+    assert(Stream.onesViaUnfold.take(3).toList == List(1, 1, 1))
+  }
+
+  "Exercise 5.13" should "map" in {
+    assert(Stream(1, 2, 3, 4).mapViaUnfold(_.toString).toList == List("1", "2", "3", "4"))
+    assert(Empty.mapViaUnfold(_.toString) == Empty)
+  }
+
+  "Exercise 5.13" should "take" in {
+    assert(Stream(1, 2, 3, 4).takeViaUnfold(0) == Empty)
+    assert(Stream(1, 2, 3, 4).takeViaUnfold(2).toList == List(1, 2))
+    assert(Stream(1, 2, 3, 4).takeViaUnfold(4).toList == List(1, 2, 3, 4))
+    assert(Empty.takeViaUnfold(1) == Empty)
+    assert(Stream(1, 2, 3, 4).takeViaUnfold(5).toList == List(1, 2, 3, 4))
+  }
+
+  "Exercise 5.13" should "takeWhile" in {
+    assert(Stream(1, 1, 2, 2).takeWhileViaUnfold(_ == 1).toList == List(1, 1))
+    assert(Empty.takeWhileViaUnfold(_ => true) == Empty)
+    assert(Stream(2, 2, 2, 2).takeWhileViaUnfold(_ == 1).toList == Nil)
+    assert(Stream(1, 1, 1, 1).takeWhileViaUnfold(_ == 1).toList == List(1, 1, 1, 1))
+  }
+
+  "Exercise 5.13" should "zipWith" in {
+    assert(Stream(1, 1, 1).zipWith(Stream(1, 1, 1))(_ + _).toList == List(2, 2, 2))
+    assert(Stream(1, 1, 1).zipWith(Empty)((_, _) => 1).toList == Nil)
+    assert(Stream(1, 1, 1).zipWith(Stream(2, 3))(_ + _).toList == List(3, 4))
+    assert(Stream(1, 1).zipWith(Stream(2, 3, 4))(_ + _).toList == List(3, 4))
+    assert(Empty.zipWith(Stream(1))((_, _) => 1).toList == Nil)
+    assert(Empty.zipWith(Empty)((_, _) => 1).toList == Nil)
+  }
+
+  "Exercise 5.13" should "zipAll" in {
+    assert(Stream(1, 2, 3).zipAll(Stream(4, 5, 6)).toList == List((Some(1), Some(4)), (Some(2), Some(5)), (Some(3), Some(6))))
+    assert(Stream(1, 2, 3).zipAll(Empty).toList == List((Some(1), None), (Some(2), None), (Some(3), None)))
+    assert(Stream(1, 2, 3).zipAll(Stream(4, 5)).toList == List((Some(1), Some(4)), (Some(2), Some(5)), (Some(3), None)))
+    assert(Stream(1, 2).zipAll(Stream(4, 5, 6)).toList == List((Some(1), Some(4)), (Some(2), Some(5)), (None, Some(6))))
+    assert(Empty.zipAll(Stream(1)).toList == List((None, Some(1))))
+    assert(Empty.zipAll(Empty).toList == Nil)
   }
 
 }
