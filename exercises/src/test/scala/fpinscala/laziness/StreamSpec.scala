@@ -159,4 +159,8 @@ class StreamSpec extends FlatSpec with Matchers {
     assert(Empty.zipAll(Empty).toList == Nil)
   }
 
+  "Exercise 5.14" should "startsWith" in {
+    assert(Stream(1,2,3).startsWith(Stream(1,2)))
+    assert(!Stream(1,2,3).startsWith(Stream(1,3)))
+  }
 }
