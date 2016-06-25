@@ -163,4 +163,9 @@ class StreamSpec extends FlatSpec with Matchers {
     assert(Stream(1,2,3).startsWith(Stream(1,2)))
     assert(!Stream(1,2,3).startsWith(Stream(1,3)))
   }
+
+  "Exercise 5.15" should "tails" in {
+    assert(Stream(1,2,3).tails.map(_.toList).toList == List(List(1,2,3),List(2,3),List(3),Nil))
+    assert(Empty.tails.toList == List(Empty))
+  }
 }
