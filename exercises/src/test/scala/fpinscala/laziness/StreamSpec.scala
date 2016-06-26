@@ -168,4 +168,8 @@ class StreamSpec extends FlatSpec with Matchers {
     assert(Stream(1,2,3).tails.map(_.toList).toList == List(List(1,2,3),List(2,3),List(3),Nil))
     assert(Empty.tails.toList == List(Empty))
   }
+
+  "Exercise 5.15" should "scanRight" in {
+    assert( Stream(1,2,3).scanRight(0)( _ + _ ).toList == List(6,5,3,0))
+  }
 }

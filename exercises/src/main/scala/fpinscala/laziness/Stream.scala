@@ -63,7 +63,9 @@ trait Stream[+A] {
     foldRight(empty: Stream[B])((a, b) => f(a).append(b))
 
   def startsWith[B](s: Stream[B]): Boolean =
-    zipAll(s).takeWhile{ _._2.isDefined }.forAll{ case (l,r) => l == r }
+    zipAll(s).takeWhile {
+      _._2.isDefined
+    }.forAll { case (l, r) => l == r }
 
   def mapViaUnfold[B](f: A => B): Stream[B] =
     unfold(this) {
@@ -98,10 +100,28 @@ trait Stream[+A] {
     }
 
   def tails: Stream[Stream[A]] =
-    unfold(this){
+    unfold(this) {
       case Empty => None
-      case s => Some((s,s.drop(1)))
+      case s => Some((s, s.drop(1)))
     } append Stream(empty)
+
+  def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] = {
+    case class X(value: B, output:Stream[B])
+
+    foldRight(X(z, Stream(z)))((a, s) => {
+
+      lazy val sr = s
+      val b = f(a, sr.value)
+      X(b, cons(b, s.output))
+    }).output
+  }
+
+
+  def scanRight2[B](z: => B)(f: (A, => B) => B): Stream[B] =
+    unfold(this) {
+      case Empty => None
+      case s => Some((s.foldRight(z)(f), s.drop(1)))
+    } append Stream(z)
 }
 
 case object Empty extends Stream[Nothing]
