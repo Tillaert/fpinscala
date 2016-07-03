@@ -17,6 +17,11 @@ object RNG {
     }
   }
 
+  case class Mock(v: Int) extends RNG {
+    def nextInt:(Int,RNG) = (v, this)
+  }
+
+
   type Rand[+A] = RNG => (A, RNG)
 
   val int: Rand[Int] = _.nextInt
@@ -30,7 +35,15 @@ object RNG {
       (f(a), rng2)
     }
 
-  def nonNegativeInt(rng: RNG): (Int, RNG) = ???
+  def nonNegativeInt(rng: RNG): (Int, RNG) = {
+    val (v, r) = rng.nextInt
+
+    (v match {
+      case Int.MinValue => 0
+      case s if s < 0 => -s
+      case s => s
+    },r)
+  }
 
   def double(rng: RNG): (Double, RNG) = ???
 
