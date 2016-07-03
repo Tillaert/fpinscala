@@ -109,7 +109,6 @@ trait Stream[+A] {
     case class X(value: B, output:Stream[B])
 
     foldRight(X(z, Stream(z)))((a, s) => {
-
       lazy val sr = s
       val b = f(a, sr.value)
       X(b, cons(b, s.output))
