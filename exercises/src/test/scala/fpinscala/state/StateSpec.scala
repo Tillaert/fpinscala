@@ -44,7 +44,7 @@ class StateSpec extends FlatSpec with Matchers {
     assert(RNG.doubleInt(r1) ==((d1, 2345), r3))
   }
 
-  "Exercise 6.4" should "doulbe3" in {
+  "Exercise 6.4" should "double3" in {
     val r4 = RNG.Mock(4567)
     val r3 = RNG.Mock(3456, r4)
     val r2 = RNG.Mock(2345, r3)
@@ -54,5 +54,14 @@ class StateSpec extends FlatSpec with Matchers {
     val d3 = 3456 / (Int.MaxValue.toDouble + 1)
 
     assert(RNG.double3(r1) ==((d1, d2, d3), r4))
+  }
+
+  "Exercise 6.5" should "ints" in {
+    val r4 = RNG.Mock(4567)
+    val r3 = RNG.Mock(3456, r4)
+    val r2 = RNG.Mock(2345, r3)
+    val r1 = RNG.Mock(1234, r2)
+
+    assert(RNG.ints(3)(r1) ==(List(1234, 2345, 3456), r4))
   }
 }
