@@ -4,21 +4,55 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class StateSpec extends FlatSpec with Matchers {
   "Exercise 6.1" should "nonNegativeInt" in {
-    val r = RNG.Mock(42)
-    assert(RNG.nonNegativeInt(r) ==(42, r))
+    val r0 = RNG.Simple(0)
+    val r = RNG.Mock(42, r0)
+    assert(RNG.nonNegativeInt(r) ==(42, r0))
 
-    val r2 = RNG.Mock(-42)
-    assert(RNG.nonNegativeInt(r2) ==(42, r2))
+    val r2 = RNG.Mock(-42, r0)
+    assert(RNG.nonNegativeInt(r2) ==(42, r0))
 
-    val r3 = RNG.Mock(0)
-    assert(RNG.nonNegativeInt(r3) ==(0, r3))
+    val r3 = RNG.Mock(0, r0)
+    assert(RNG.nonNegativeInt(r3) ==(0, r0))
 
-    val r4 = RNG.Mock(Int.MinValue)
-    assert(RNG.nonNegativeInt(r4) ==(0, r4))
+    val r4 = RNG.Mock(Int.MinValue, r0)
+    assert(RNG.nonNegativeInt(r4) ==(0, r0))
   }
 
-  "Exercise 6.1" should "doulbe" in {
+  "Exercise 6.1" should "double" in {
+    val r0 = RNG.Simple(0)
     val r = RNG.Mock(1234)
-    assert(RNG.double(r) == (1234 / (Int.MaxValue.toDouble + 1), r))
+    assert(RNG.double(r) ==(1234 / (Int.MaxValue.toDouble + 1), r0))
+  }
+
+  "Exercise 6.2" should "intDouble" in {
+    val r3 = RNG.Mock(3456)
+    val r2 = RNG.Mock(2345, r3)
+    val r1 = RNG.Mock(1234, r2)
+    val d2 = 2345 / (Int.MaxValue.toDouble + 1)
+
+    assert(r2.nextInt ==(2345, r3))
+
+    assert(RNG.intDouble(r1) ==((1234, d2), r3))
+  }
+
+  "Exercise 6.3" should "doubleInt" in {
+    val r3 = RNG.Mock(3456)
+    val r2 = RNG.Mock(2345, r3)
+    val r1 = RNG.Mock(1234, r2)
+    val d1 = 1234 / (Int.MaxValue.toDouble + 1)
+
+    assert(RNG.doubleInt(r1) ==((d1, 2345), r3))
+  }
+
+  "Exercise 6.4" should "doulbe3" in {
+    val r4 = RNG.Mock(4567)
+    val r3 = RNG.Mock(3456, r4)
+    val r2 = RNG.Mock(2345, r3)
+    val r1 = RNG.Mock(1234, r2)
+    val d1 = 1234 / (Int.MaxValue.toDouble + 1)
+    val d2 = 2345 / (Int.MaxValue.toDouble + 1)
+    val d3 = 3456 / (Int.MaxValue.toDouble + 1)
+
+    assert(RNG.double3(r1) ==((d1, d2, d3), r4))
   }
 }
