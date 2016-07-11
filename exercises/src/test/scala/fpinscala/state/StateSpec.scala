@@ -18,13 +18,13 @@ class StateSpec extends FlatSpec with Matchers {
     assert(RNG.nonNegativeInt(r4) ==(0, r0))
   }
 
-  "Exercise 6.1" should "double" in {
+  "Exercise 6.2" should "double" in {
     val r0 = RNG.Simple(0)
     val r = RNG.Mock(1234)
     assert(RNG.double(r) ==(1234 / (Int.MaxValue.toDouble + 1), r0))
   }
 
-  "Exercise 6.2" should "intDouble" in {
+  "Exercise 6.3" should "intDouble" in {
     val r3 = RNG.Mock(3456)
     val r2 = RNG.Mock(2345, r3)
     val r1 = RNG.Mock(1234, r2)
@@ -44,7 +44,7 @@ class StateSpec extends FlatSpec with Matchers {
     assert(RNG.doubleInt(r1) ==((d1, 2345), r3))
   }
 
-  "Exercise 6.4" should "double3" in {
+  "Exercise 6.3" should "double3" in {
     val r4 = RNG.Mock(4567)
     val r3 = RNG.Mock(3456, r4)
     val r2 = RNG.Mock(2345, r3)
@@ -56,7 +56,7 @@ class StateSpec extends FlatSpec with Matchers {
     assert(RNG.double3(r1) ==((d1, d2, d3), r4))
   }
 
-  "Exercise 6.5" should "ints" in {
+  "Exercise 6.4" should "ints" in {
     val r4 = RNG.Mock(4567)
     val r3 = RNG.Mock(3456, r4)
     val r2 = RNG.Mock(2345, r3)
@@ -65,7 +65,7 @@ class StateSpec extends FlatSpec with Matchers {
     assert(RNG.ints(3)(r1) ==(List(1234, 2345, 3456), r4))
   }
 
-  "Exersice 6.6" should "double via map" in {
+  "Exersice 6.5" should "double via map" in {
 
     val r2 = RNG.Mock(2345)
     val r = RNG.Mock(1234, r2)
