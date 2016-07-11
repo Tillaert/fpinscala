@@ -64,4 +64,13 @@ class StateSpec extends FlatSpec with Matchers {
 
     assert(RNG.ints(3)(r1) ==(List(1234, 2345, 3456), r4))
   }
+
+  "Exersice 6.6" should "double via map" in {
+
+    val r2 = RNG.Mock(2345)
+    val r = RNG.Mock(1234, r2)
+    val d = 1234 / (Int.MaxValue.toDouble + 1)
+
+    assert(RNG.doubleViaMap(r) == (d, r2))
+  }
 }

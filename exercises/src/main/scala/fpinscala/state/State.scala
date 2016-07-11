@@ -78,6 +78,9 @@ object RNG {
     ((d0, d1, d2), r4)
   }
 
+  def doubleViaMap: Rand[Double] =
+    map(nonNegativeInt)( _ / (Int.MaxValue.toDouble + 1))
+
   def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
     if( count > 0 ) {
       val (i, r) = rng.nextInt
