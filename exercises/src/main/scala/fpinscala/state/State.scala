@@ -79,10 +79,10 @@ object RNG {
   }
 
   def doubleViaMap: Rand[Double] =
-    map(nonNegativeInt)( _ / (Int.MaxValue.toDouble + 1))
+    map(nonNegativeInt)(_ / (Int.MaxValue.toDouble + 1))
 
   def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
-    if( count > 0 ) {
+    if (count > 0) {
       val (i, r) = rng.nextInt
       val (l, r2) = RNG.ints(count - 1)(r)
       (i :: l, r2)
@@ -99,7 +99,8 @@ object RNG {
       (f(va, vb), rng3)
     }
 
-  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = ???
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
+    fs.foldRight(unit(List[A]()))((f, acc) => map2(f, acc)(_ :: _))
 
   def flatMap[A, B](f: Rand[A])(g: A => Rand[B]): Rand[B] = ???
 }

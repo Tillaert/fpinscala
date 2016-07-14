@@ -82,4 +82,12 @@ class StateSpec extends FlatSpec with Matchers {
     assert( RNG.map2(ra, rb)(_ + _)(r) == (1234 + 2345, r))
     assert( RNG.map2(ra, rb)(_ + _)(r) == (1234 + 2345, r))
   }
+
+  "Exercise 6.7" should "sequence" in {
+    val ints = List(RNG.unit(1), RNG.unit(2), RNG.unit(3))
+
+    val r = RNG.Simple(0)
+
+    assert( RNG.sequence(ints)(r)._1 == List(1,2,3))
+  }
 }
