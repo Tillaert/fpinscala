@@ -97,7 +97,7 @@ class StateSpec extends FlatSpec with Matchers {
     assert(RNG.flatMap(r) { i: Int => RNG.unit(i + 1) }(rng)._1 == 1235)
   }
 
-  "Exercise 6.6" should "map via flatMap" in {
+  "Exercise 6.9" should "map via flatMap" in {
     val r = RNG.unit(1234)
 
     val rng = RNG.Mock(666)
@@ -105,7 +105,7 @@ class StateSpec extends FlatSpec with Matchers {
     assert( RNG.mapViaFlatMap(r)(_.toString)(rng)._1 == "1234")
   }
 
-  "Exercise 6.6" should "map2 via flatMap" in {
+  "Exercise 6.9" should "map2 via flatMap" in {
     val ra = RNG.unit(1234)
     val rb = RNG.unit(2345)
 
