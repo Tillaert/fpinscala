@@ -102,7 +102,7 @@ class StateSpec extends FlatSpec with Matchers {
 
     val rng = RNG.Mock(666)
 
-    assert( RNG.mapViaFlatMap(r)(_.toString)(rng)._1 == "1234")
+    assert(RNG.mapViaFlatMap(r)(_.toString)(rng)._1 == "1234")
   }
 
   "Exercise 6.9" should "map2 via flatMap" in {
@@ -114,4 +114,32 @@ class StateSpec extends FlatSpec with Matchers {
     assert(RNG.map2ViaFlatMap(ra, rb)(_ + _)(r)._1 == 1234 + 2345)
   }
 
+  "Exercise 6.10" should "state unit" in {
+    val s = State.unit[Int, Int](123)
+
+    assert(s.run(1)._1 == 123)
+  }
+
+  "Exercise 6.10" should "state map" in {
+    val s = State.unit[Int, Int](123)
+
+    assert(s.map(_.toString).run(1)._1 == "123")
+  }
+
+  "Exercise 6.10" should "state map2" in {
+    val ra = State.unit[Int, Int](1234)
+    val rb = State.unit[Int, Int](2345)
+
+    assert(ra.map2(rb)(_ + _).run(2)._1 == 1234 + 2345)
+  }
+
+  "Exercise 6.10" should "state flatMap" in {
+    assert(State.unit[Int, Int](1234).flatMap { i: Int => State.unit(i + 1) }.run(1)._1 == 1235)
+  }
+
+  "Exercise 6.10" should "state sequence" in {
+    val ints = List(State.unit[Int, Int](1), State.unit[Int, Int](2), State.unit[Int, Int](3))
+
+    assert( State.sequence(ints).run(1)._1 == List(1, 2, 3))
+  }
 }
