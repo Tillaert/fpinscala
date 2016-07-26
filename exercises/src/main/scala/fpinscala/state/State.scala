@@ -146,13 +146,7 @@ case class State[S, +A](run: S => (A, S)) {
     }
 }
 
-sealed trait Input
-
-case object Coin extends Input
-
-case object Turn extends Input
-
-case class Machine(locked: Boolean, candies: Int, coins: Int)
+import State._
 
 object State {
   type Rand[A] = State[RNG, A]
@@ -162,5 +156,41 @@ object State {
 
   def unit[S, A](v: A): State[S, A] = State(s => (v, s))
 
-  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = ???
+  def set[S](s: S): State[S, Unit] = State(_ => ((), s))
+
+  def get[S]: State[S, S] = State(s => (s, s))
+
+  def modify[S](f: S => S): State[S, Unit] = for {
+    s <- get
+    _ <- set(f(s))
+  } yield ()
+
+}
+
+sealed trait Input
+
+case object Coin extends Input
+
+case object Turn extends Input
+
+case class Machine(locked: Boolean, candies: Int, coins: Int)
+
+
+object CandyMachine {
+
+  def update = (i: Input) => (s: Machine) =>
+    (i, s) match {
+      case (Coin, Machine(true, candies, coins)) => Machine(locked = false, candies, coins)
+      case (Turn, Machine(false, candies, coins)) if candies > 0 => Machine(locked = true, candies - 1, coins + 1)
+      case _ => s
+    }
+
+  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] =
+    for {
+    // List[Inputs] -> List[StateTransitionTable(Inputs)] -> StateTransitionTable(List[Inputs])
+      _ <- sequence(inputs map (modify[Machine] _ compose update))
+      // Get resulting state
+      s <- get
+    } yield (s.coins, s.candies)
+
 }

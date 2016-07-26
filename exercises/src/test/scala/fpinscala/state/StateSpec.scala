@@ -140,6 +140,37 @@ class StateSpec extends FlatSpec with Matchers {
   "Exercise 6.10" should "state sequence" in {
     val ints = List(State.unit[Int, Int](1), State.unit[Int, Int](2), State.unit[Int, Int](3))
 
-    assert( State.sequence(ints).run(1)._1 == List(1, 2, 3))
+    assert(State.sequence(ints).run(1)._1 == List(1, 2, 3))
+  }
+
+  "Exercise 6.11" should "unlock a candy" in {
+    assert(CandyMachine.simulateMachine(List(Coin, Turn)).run(Machine(locked = true, 5, 0))._1 == (1, 4))
+  }
+
+  "Exercise 6.11" should "turning the knob on an unlocked machine" in {
+    assert(CandyMachine.simulateMachine(List(Turn)).run(Machine(locked = false, 5, 0))._1 == (1, 4))
+  }
+
+  "Exercise 6.11" should "turning the knob on a locked machine does nothing" in {
+    assert(CandyMachine.simulateMachine(List(Turn)).run(Machine(locked = true, 5, 0))._1 == (0, 5))
+  }
+
+  "Exercise 6.11" should "inserting a coin in an unlocked machine does nothing" in {
+    assert(CandyMachine.simulateMachine(List(Coin)).run(Machine(locked = false, 5, 0))._1 == (0, 5))
+  }
+
+  "Exercise 6.11" should "a machine that's out of candy ignores coins" in {
+    assert(CandyMachine.simulateMachine(List(Coin)).run(Machine(locked = true, 0, 0))._1 == (0, 0))
+  }
+
+  "Exercise 6.11" should "a machine that's out of candyh ignores turns" in {
+    assert(CandyMachine.simulateMachine(List(Turn)).run(Machine(locked = false, 0, 0))._1 == (0, 0))
+  }
+
+  "Exercise 6.11" should "simulateState" in {
+    val inputs = List(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn)
+    val machine = Machine(locked = true, 5, 10)
+
+    assert(CandyMachine.simulateMachine(inputs).run(machine)._1 == (14, 1))
   }
 }
