@@ -41,7 +41,7 @@ class ParSpec extends FlatSpec with Matchers {
   "Exercise 7.4" should "map2" in {
     val es = Executors.newSingleThreadExecutor
 
-    assert(Par.run(es)(Par.map2(Par.unit(10),Par.unit(1000))(_+_)).get == 1010)
+    assert(Par.run(es)(Par.map2(Par.unit(10), Par.unit(1000))(_ + _)).get == 1010)
   }
 
   "Exercise 7.4" should "sequence" in {
@@ -49,6 +49,17 @@ class ParSpec extends FlatSpec with Matchers {
 
     val l = List(Par.unit(100), Par.lazyUnit(10), Par.unit(1))
 
-    assert( Par.run(es)( Par.sequence(l)).get == List(100,10,1))
+    assert(Par.run(es)(Par.sequence(l)).get == List(100, 10, 1))
+  }
+
+  "Exercise 7.5" should "perFilter" in {
+    val es = Executors.newSingleThreadExecutor
+
+    val l = List(0, 1, 2, 3, 4, 5)
+
+    def f(i: Int) = i % 2 == 0
+
+    assert(Par.run(es)(Par.parFilter(l)(f)).get == List(0, 2, 4))
   }
 }
+
