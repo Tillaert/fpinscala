@@ -44,7 +44,7 @@ class ParSpec extends FlatSpec with Matchers {
     assert(Par.run(es)(Par.map2(Par.unit(10), Par.unit(1000))(_ + _)).get == 1010)
   }
 
-  "Exercise 7.4" should "sequence" in {
+  "Exercise 7.5" should "sequence" in {
     val es = Executors.newSingleThreadExecutor
 
     val l = List(Par.unit(100), Par.lazyUnit(10), Par.unit(1))
@@ -52,7 +52,7 @@ class ParSpec extends FlatSpec with Matchers {
     assert(Par.run(es)(Par.sequence(l)).get == List(100, 10, 1))
   }
 
-  "Exercise 7.5" should "perFilter" in {
+  "Exercise 7.6" should "perFilter" in {
     // Since this implementation does not abide to the laws, it will block indefinately on a single threaded executor.
     val es = Executors.newCachedThreadPool
 
