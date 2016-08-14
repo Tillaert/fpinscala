@@ -84,6 +84,16 @@ object Par {
   def choiceNViaChoiceMap[A](n: Par[Int])(choices: List[Par[A]]): Par[A] =
     choiceMap(n)((choices.indices zip choices).toMap)
 
+  def chooser[A,B](ps: Par[A])(choices: A => Par[B]): Par[B] =
+    es => choices(run(es)(ps).get)(es)
+
+  def choiceViaChooser[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] =
+    chooser(cond)(Map(true -> t, false -> f))
+
+  def choiceNViaChooser[A](n: Par[Int])(choices: List[Par[A]]): Par[A] =
+    chooser(n)((choices.indices zip choices).toMap)
+
+
   /* Gives us infix syntax for `Par`. */
   implicit def toParOps[A](p: Par[A]): ParOps[A] = new ParOps(p)
 

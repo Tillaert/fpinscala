@@ -201,6 +201,82 @@ class ParSpec extends FlatSpec with Matchers {
     assert(Par.run(es)(cn).get == 2)
   }
 
+  "Exercise 7.13 chooser" should "with a produce A" in {
+    val es = Executors.newCachedThreadPool
+
+    val m = Map("a" -> Par.unit("A"), "b" -> Par.unit("B"), "c" -> Par.unit("C"))
+
+    val cn = Par.chooser(Par.unit("a"))(m)
+
+    assert(Par.run(es)(cn).get == "A")
+  }
+
+  "Exercise 7.13 chooser" should "with b produce B" in {
+    val es = Executors.newCachedThreadPool
+
+    val m = Map("a" -> Par.unit("A"), "b" -> Par.unit("B"), "c" -> Par.unit("C"))
+
+    val cn = Par.chooser(Par.unit("b"))(m)
+
+    assert(Par.run(es)(cn).get == "B")
+  }
+
+  "Exercise 7.13 chooser" should "with c produce C" in {
+    val es = Executors.newCachedThreadPool
+
+    val m = Map("a" -> Par.unit("A"), "b" -> Par.unit("B"), "c" -> Par.unit("C"))
+
+    val cn = Par.chooser(Par.unit("c"))(m)
+
+    assert(Par.run(es)(cn).get == "C")
+  }
+
+  "Exercise 7.13 choiceViaChooser" should "with true produce 0" in {
+    val es = Executors.newCachedThreadPool
+
+    val ct = Par.choiceViaChooser(Par.unit(true))(Par.unit(0), Par.unit(1))
+
+    assert(Par.run(es)(ct).get == 0)
+  }
+
+  "Exercise 7.13 choiceViaChooser" should "with false produce" in {
+    val es = Executors.newCachedThreadPool
+
+    val cf = Par.choiceViaChooser(Par.unit(false))(Par.unit(0), Par.unit(1))
+
+    assert(Par.run(es)(cf).get == 1)
+  }
+
+  "Exercise 7.13 choiceNViaChooser" should "with 0 produce 0" in {
+    val es = Executors.newCachedThreadPool
+
+    val pl = List(Par.unit(0), Par.unit(1), Par.unit(2))
+
+    val cn = Par.choiceNViaChooser(Par.unit(0))(pl)
+
+    assert(Par.run(es)(cn).get == 0)
+  }
+
+  "Exercise 7.13 choiceNViaChooser" should "with 1 produce 1" in {
+    val es = Executors.newCachedThreadPool
+
+    val pl = List(Par.unit(0), Par.unit(1), Par.unit(2))
+
+    val cn = Par.choiceNViaChooser(Par.unit(1))(pl)
+
+    assert(Par.run(es)(cn).get == 1)
+  }
+
+  "Exercise 7.13 choiceNViaChooser" should "with 2 produce 2" in {
+    val es = Executors.newCachedThreadPool
+
+    val pl = List(Par.unit(0), Par.unit(1), Par.unit(2))
+
+    val cn = Par.choiceNViaChooser(Par.unit(2))(pl)
+
+    assert(Par.run(es)(cn).get == 2)
+  }
+  
 
 }
 
