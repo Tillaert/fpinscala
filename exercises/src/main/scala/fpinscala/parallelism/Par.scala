@@ -50,10 +50,11 @@ object Par {
     sequence(fbs)
   }
 
-  def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = fork {
-    as.foldRight(unit(Nil:List[A])){ (a,l) match
-    (a,l) if(
-    }
+  def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = {
+    val psa = parMap(as)( a => if (f(a)) List(a) else Nil )
+
+    //Flatten the Par[List[List[A]] to Par[List[A]]
+    map(psa)(_.flatten)
   }
 
   def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean =

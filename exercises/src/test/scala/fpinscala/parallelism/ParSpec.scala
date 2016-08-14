@@ -53,7 +53,8 @@ class ParSpec extends FlatSpec with Matchers {
   }
 
   "Exercise 7.5" should "perFilter" in {
-    val es = Executors.newSingleThreadExecutor
+    // Since this implementation does not abide to the laws, it will block indefinately on a single threaded executor.
+    val es = Executors.newCachedThreadPool
 
     val l = List(0, 1, 2, 3, 4, 5)
 
