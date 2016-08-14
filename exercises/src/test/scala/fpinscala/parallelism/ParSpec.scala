@@ -276,7 +276,5 @@ class ParSpec extends FlatSpec with Matchers {
 
     assert(Par.run(es)(cn).get == 2)
   }
-  
-
 }
 
