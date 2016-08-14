@@ -62,5 +62,68 @@ class ParSpec extends FlatSpec with Matchers {
 
     assert(Par.run(es)(Par.parFilter(l)(f)).get == List(0, 2, 4))
   }
+
+  "Exercise 7.11" should "choice true" in {
+    val es = Executors.newCachedThreadPool
+
+    val ct = Par.choice(Par.unit(true))(Par.unit(0), Par.unit(1))
+
+    assert(Par.run(es)(ct).get == 0)
+  }
+
+  "Exercise 7.11" should "choice false" in {
+    val es = Executors.newCachedThreadPool
+
+    val cf = Par.choice(Par.unit(false))(Par.unit(0), Par.unit(1))
+
+    assert(Par.run(es)(cf).get == 1)
+  }
+
+  "Exercise 7.11" should "choiceN 0" in {
+    val es = Executors.newCachedThreadPool
+
+    val pl = List(Par.unit(0), Par.unit(1), Par.unit(2))
+
+    val cn = Par.choiceN(Par.unit(0))(pl)
+
+    assert(Par.run(es)(cn).get == 0)
+  }
+
+  "Exercise 7.11" should "choiceN 1" in {
+    val es = Executors.newCachedThreadPool
+
+    val pl = List(Par.unit(0), Par.unit(1), Par.unit(2))
+
+    val cn = Par.choiceN(Par.unit(1))(pl)
+
+    assert(Par.run(es)(cn).get == 1)
+  }
+
+  "Exercise 7.11" should "choiceN 2" in {
+    val es = Executors.newCachedThreadPool
+
+    val pl = List(Par.unit(0), Par.unit(1), Par.unit(2))
+
+    val cn = Par.choiceN(Par.unit(2))(pl)
+
+    assert(Par.run(es)(cn).get == 2)
+  }
+
+  "Exercise 7.11" should "choiceViaChoiceN true" in {
+    val es = Executors.newCachedThreadPool
+
+    val ct = Par.choiceViaChoiceN(Par.unit(true))(Par.unit(0), Par.unit(1))
+
+    assert(Par.run(es)(ct).get == 0)
+  }
+
+  "Exercise 7.11" should "choiceViaChoiceN false" in {
+    val es = Executors.newCachedThreadPool
+
+    val cf = Par.choiceViaChoiceN(Par.unit(false))(Par.unit(0), Par.unit(1))
+
+    assert(Par.run(es)(cf).get == 1)
+  }
+
 }
 

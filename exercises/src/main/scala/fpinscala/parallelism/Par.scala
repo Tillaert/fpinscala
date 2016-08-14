@@ -45,13 +45,13 @@ object Par {
   def sequence[A](ps: List[Par[A]]): Par[List[A]] =
     ps.foldRight(unit(Nil: List[A]))((a, l) => Par.map2(a, l)(_ :: _))
 
-  def parMap[A,B](ps: List[A])(f: A=>B) : Par[List[B]] = fork {
+  def parMap[A, B](ps: List[A])(f: A => B): Par[List[B]] = fork {
     var fbs: List[Par[B]] = ps.map(asyncF(f))
     sequence(fbs)
   }
 
   def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = {
-    val psa = parMap(as)( a => if (f(a)) List(a) else Nil )
+    val psa = parMap(as)(a => if (f(a)) List(a) else Nil)
 
     //Flatten the Par[List[List[A]] to Par[List[A]]
     map(psa)(_.flatten)
@@ -67,6 +67,13 @@ object Par {
     es =>
       if (run(es)(cond).get) t(es) // Notice we are blocking on the result of `cond`.
       else f(es)
+
+  def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] =
+    es =>
+      choices(run(es)(n).get)(es)
+
+  def choiceViaChoiceN[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A] =
+    choiceN(map(cond)(v => if (v) 0 else 1))(List(t, f))
 
   /* Gives us infix syntax for `Par`. */
   implicit def toParOps[A](p: Par[A]): ParOps[A] = new ParOps(p)
