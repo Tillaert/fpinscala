@@ -178,6 +178,11 @@ class NonblockingSpec extends FlatSpec with Matchers {
     assert(Nonblocking.Par.run(es)(cn) == 2)
   }
 
+  "Exercise 7.14 join" should "flatten a Par[Par[A]]" in {
+    val es = Executors.newSingleThreadExecutor
 
+    val pp = join(unit(unit(1)))
 
+    assert(Nonblocking.Par.run(es)(pp) == 1)
+  }
 }
