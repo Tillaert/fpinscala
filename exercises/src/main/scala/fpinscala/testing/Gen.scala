@@ -14,6 +14,7 @@ shell, which you can fill in and modify while working through the chapter.
 */
 
 trait Prop {
+  def check: Boolean = ???
 }
 
 object Prop {
@@ -22,6 +23,8 @@ object Prop {
 
 object Gen {
   def unit[A](a: => A): Gen[A] = ???
+  def listOf[A](g: Gen[A]): Gen[List[A]] = ???
+  def choose[Int](lb: Int, ub: Int):Gen[Int] = ???
 }
 
 trait Gen[A] {
