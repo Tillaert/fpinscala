@@ -43,10 +43,17 @@ object Gen {
 
   def boolean: Gen[Boolean] = Gen(State(RNG.boolean))
 
+  def double: Gen[Double] = Gen(State(RNG.double))
+
   def choose(lb: Int, ub: Int): Gen[Int] =
     Gen(State(RNG.nonNegativeInt).map((v: Int) => lb + v % (ub - lb)))
 
   def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] = boolean.flatMap( b => if(b) g1 else g2 )
+
+  def weighted[A](g1: (Gen[A], Double), g2: (Gen[A],Double)): Gen[A] = {
+    val threshold = g1._2.abs / (g1._2.abs + g2._2.abs)
+    double.flatMap(d => if (d < threshold) g1._1 else g2._1)
+  }
 }
 
 case class Gen[A](sample: State[RNG, A]) {
