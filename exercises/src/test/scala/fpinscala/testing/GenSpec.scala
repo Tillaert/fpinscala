@@ -63,5 +63,18 @@ class GenSpec extends FlatSpec with Matchers {
 
     assert(prop.check.isRight)
   }
+
+  "Exercise 8.5 Gen.unit" should "compile" in {
+    val value = Gen.unit(10)
+  }
+
+  "Exercise 8.5 Gen.boolean" should "compile" in {
+    val value = Gen.boolean
+  }
+
+  "Exercise 8.5 Gen.listOfN" should "compile" in {
+    val value = Gen.listOfN(10, Gen.choose(0,10))
+  }
+
 }
 

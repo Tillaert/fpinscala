@@ -16,9 +16,9 @@ trait Prop {
     override def check =
       (Prop.this.check, that.check) match {
         case (Right(l), Right(r)) => Right(l + r)
-        case (Right(l), Left((f,r))) => Left((f,l+r))
-        case (Left((f,l)), Right(r)) => Left((f,l+r))
-        case (Left((fl,l)), Left((fr,r))) => Left((fl+fr,l+r))
+        case (Right(l), Left((f, r))) => Left((f, l + r))
+        case (Left((f, l)), Right(r)) => Left((f, l + r))
+        case (Left((fl, l)), Left((fr, r))) => Left((fl + fr, l + r))
       }
   }
 }
@@ -31,12 +31,16 @@ object Prop {
 }
 
 object Gen {
-  def unit[A](a: => A): Gen[A] = ???
+  def unit[A](a: => A): Gen[A] = Gen(State(RNG.unit(a)))
+
+  def listOfN[A](n: Int, g: Gen[A]): Gen[List[A]] = Gen(State.sequence(List.fill(n)(g.sample)))
 
   def listOf[A](g: Gen[A]): Gen[List[A]] = ???
 
+  def boolean: Gen[Boolean] = Gen(State(RNG.boolean))
+
   def choose(lb: Int, ub: Int): Gen[Int] =
-    Gen(State(RNG.nonNegativeInt).map( (v:Int) => lb + v % (ub - lb ) ))
+    Gen(State(RNG.nonNegativeInt).map((v: Int) => lb + v % (ub - lb)))
 }
 
 case class Gen[A](sample: State[RNG, A]) {
