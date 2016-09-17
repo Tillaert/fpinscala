@@ -76,5 +76,8 @@ class GenSpec extends FlatSpec with Matchers {
     val value = Gen.listOfN(10, Gen.choose(0,10))
   }
 
+  "Exercise 8.5 Gen.flatmap" should "compile" in {
+    val value = Gen.unit(10).flatMap( (i :Int) => Gen.unit(i + 10))
+  }
 }
 
