@@ -22,7 +22,6 @@ case class Prop(run: TestCases => Result) {
       }
   )
 }
-}
 
 object Prop {
   type TestCases = Int
