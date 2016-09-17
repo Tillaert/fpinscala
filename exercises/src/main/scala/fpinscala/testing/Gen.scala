@@ -12,7 +12,16 @@ shell, which you can fill in and modify while working through the chapter.
 case class Prop(run: TestCases => Result) {
   def check: Either[(FailedCase, SuccessCount), SuccessCount] = ???
 
-  def &&(that: Prop): Prop = ???
+  def &&(that: Prop): Prop = new Prop (
+    (tc: TestCases) =>
+      (Prop.this.check, that.check) match {
+        case (Right(l), Right(r)) => Right(l + r)
+        case (Right(l), Left((f, r))) => Left((f, l + r))
+        case (Left((f, l)), Right(r)) => Left((f, l + r))
+        case (Left((fl, l)), Left((fr, r))) => Left((fl + fr, l + r))
+      }
+  )
+}
 }
 
 object Prop {
