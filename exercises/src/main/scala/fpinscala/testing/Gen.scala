@@ -37,7 +37,6 @@ object Prop {
 object Gen {
   def unit[A](a: => A): Gen[A] = Gen(State(RNG.unit(a)))
 
-
   def listOfN[A](n: Int, g: Gen[A]): Gen[List[A]] = Gen(State.sequence(List.fill(n)(g.sample)))
 
   def listOf[A](g: Gen[A]): Gen[List[A]] = ???
@@ -46,6 +45,8 @@ object Gen {
 
   def choose(lb: Int, ub: Int): Gen[Int] =
     Gen(State(RNG.nonNegativeInt).map((v: Int) => lb + v % (ub - lb)))
+
+  def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] = boolean.flatMap( b => if(b) g1 else g2 )
 }
 
 case class Gen[A](sample: State[RNG, A]) {
