@@ -27,15 +27,15 @@ case class Prop(run: (TestCases, RNG) => Result) {
 
   def &&(that: Prop): Prop = new Prop(
     (tc: TestCases, rng) => Prop.this.run(tc, rng) match {
-        case Passed => that.run(tc,rng)
-        case f => f
-      }
+      case Passed => that.run(tc, rng)
+      case f => f
+    }
   )
 
   def ||(that: Prop): Prop = new Prop(
     (tc: TestCases, rng) =>
       Prop.this.run(tc, rng) match {
-        case f:Falsified => that.run(tc, rng)
+        case f: Falsified => that.run(tc, rng)
         case x => x
       }
   )
@@ -80,7 +80,7 @@ object Gen {
 
   def listOfN[A](n: Int, g: Gen[A]): Gen[List[A]] = Gen(State.sequence(List.fill(n)(g.sample)))
 
-  def listOf[A](g: Gen[A]): Gen[List[A]] = ???
+  def listOf[A](g: Gen[A]): SGen[List[A]] = SGen(n => g.listOfN(n))
 
   def boolean: Gen[Boolean] = Gen(State(RNG.boolean))
 
@@ -97,7 +97,7 @@ object Gen {
   }
 }
 
-case class Gen[A](sample: State[RNG, A]) {
+case class Gen[+A](sample: State[RNG, A]) {
   def map[B](f: A => B): Gen[B] = Gen(this.sample.map(a => f(a)))
 
   def flatMap[B](f: A => Gen[B]): Gen[B] = Gen(sample.flatMap(a => f(a).sample))
@@ -106,8 +106,20 @@ case class Gen[A](sample: State[RNG, A]) {
 
   def listOfN(size: Gen[Int]): Gen[List[A]] = size flatMap (s => this.listOfN(s))
 
-  def unsized: SGen[A] =  SGen( _ => this )
+  def unsized: SGen[A] = SGen(_ => this)
 }
 
-case class SGen[+A](forSize: Int => Gen[A])
+case class SGen[+A](g: Int => Gen[A]) {
+  def apply(n: Int): Gen[A] = g(n)
+
+  def map[B](f: A => B): SGen[B] = SGen(g(_) map f)
+
+  def flatMap[B](f: A => SGen[B]): SGen[B] = {
+    val g2: Int => Gen[B] = n =>
+      g(n) flatMap (f(_).g(n))
+    SGen(g2)
+  }
+
+
+}
 

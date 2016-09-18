@@ -6,7 +6,7 @@ class GenSpec extends FlatSpec with Matchers {
   def sum(l: List[Int]): Int = l.sum
 
   "Exercise 8.1 sum reversed" should "be equal to the regular sum" in {
-    val intList = Gen.listOf(Gen.choose(0, 100))
+    val intList = Gen.listOfN(10, Gen.choose(0, 100))
 
     val prop = Prop.forAll(intList)(ns => sum(ns.reverse) == sum(ns))
 
@@ -24,7 +24,7 @@ class GenSpec extends FlatSpec with Matchers {
   def max(l: List[Int]): Int = l.max
 
   "Exercise 8.2 max of a list" should "be greater than any value of that list" in {
-    val intList = Gen.listOf(Gen.choose(0, 100))
+    val intList = Gen.listOfN(10, Gen.choose(0, 100))
 
     val prop = Prop.forAll(intList)(ns => max(ns) == ns.max)
 
@@ -73,11 +73,11 @@ class GenSpec extends FlatSpec with Matchers {
   }
 
   "Exercise 8.5 Gen.listOfN" should "compile" in {
-    val value = Gen.listOfN(10, Gen.choose(0,10))
+    val value = Gen.listOfN(10, Gen.choose(0, 10))
   }
 
   "Exercise 8.5 Gen.flatmap" should "compile" in {
-    val value = Gen.unit(10).flatMap( (i :Int) => Gen.unit(i + 10))
+    val value = Gen.unit(10).flatMap((i: Int) => Gen.unit(i + 10))
   }
 }
 
