@@ -90,5 +90,20 @@ class GenSpec extends FlatSpec with Matchers {
 
     Prop.run(maxProp1)
   }
+
+  "Exercise 8.14 List.sorted" should "be tested" in {
+    val smallInt = Gen.choose(0, 100)
+
+    val sortedProp = Prop.forAll(Gen.listOf(smallInt)) { ns =>
+      val nss = ns.sorted
+      // We specify that every sorted list is either empty, has one element,
+      // or has no two consecutive elements `(a,b)` such that `a` is greater than `b`.
+      (nss.isEmpty || nss.tail.isEmpty || !nss.zip(nss.tail).exists {
+        case (a, b) => a > b
+      })
+    }
+
+    Prop.run(sortedProp)
+  }
 }
 
