@@ -10,7 +10,7 @@ class GenSpec extends FlatSpec with Matchers {
 
     val prop = Prop.forAll(intList)(ns => sum(ns.reverse) == sum(ns))
 
-    assert(prop.check.isRight)
+    Prop.run(prop)
   }
 
   "Exercise 8.1 sum of same values" should "be equal to the length of the list times that value" in {
@@ -18,7 +18,7 @@ class GenSpec extends FlatSpec with Matchers {
 
     val prop = Prop.forAll(value)(v => sum(List.fill(100)(v)) == 100 * v)
 
-    assert(prop.check.isRight)
+    Prop.run(prop)
   }
 
   def max(l: List[Int]): Int = l.max
@@ -28,7 +28,7 @@ class GenSpec extends FlatSpec with Matchers {
 
     val prop = Prop.forAll(intList)(ns => max(ns) == ns.max)
 
-    assert(prop.check.isRight)
+    Prop.run(prop)
   }
 
   "Exercise 8.2 max of a list of one item" should "be that item" in {
@@ -36,7 +36,7 @@ class GenSpec extends FlatSpec with Matchers {
 
     val prop = Prop.forAll(value)(v => max(List(v)) == v)
 
-    assert(prop.check.isRight)
+    Prop.run(prop)
   }
 
   "Exercise 8.2 max of a list of items with the same value" should "be that item" in {
@@ -44,7 +44,7 @@ class GenSpec extends FlatSpec with Matchers {
 
     val prop = Prop.forAll(value)(v => max(List.fill(100)(v)) == v)
 
-    assert(prop.check.isRight)
+    Prop.run(prop)
   }
 
   "Exercise 8.3 &&" should "combine two props" in {
@@ -53,7 +53,7 @@ class GenSpec extends FlatSpec with Matchers {
     val prop = Prop.forAll(value)(v => v >= 1) &&
       Prop.forAll(value)(v => v < 100)
 
-    assert(prop.check.isRight)
+    Prop.run(prop)
   }
 
   "Exercise 8.4 choose " should "generate a value between start and stop" in {
@@ -61,7 +61,7 @@ class GenSpec extends FlatSpec with Matchers {
 
     val prop = Prop.forAll(value)(v => v >= 5 && v < 10)
 
-    assert(prop.check.isRight)
+    Prop.run(prop)
   }
 
   "Exercise 8.5 Gen.unit" should "compile" in {

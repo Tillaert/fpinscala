@@ -3,7 +3,7 @@ package fpinscala.testing
 import fpinscala.state.State
 import fpinscala.state.RNG
 import fpinscala.laziness.Stream
-import fpinscala.testing.Prop.{FailedCase, SuccessCount, TestCases}
+import fpinscala.testing.Prop._
 
 /*
 The library developed in this chapter goes through several iterations. This file is just the
@@ -22,27 +22,28 @@ case class Falsified(failure: FailedCase, successes: SuccessCount) extends Resul
   def isFalsified: Boolean = true
 }
 
-case class Prop(run: (TestCases, RNG) => Result) {
+
+case class Prop(run: (MaxSize, TestCases, RNG) => Result) {
   def check: Either[(FailedCase, SuccessCount), SuccessCount] = ???
 
   def &&(that: Prop): Prop = new Prop(
-    (tc: TestCases, rng) => Prop.this.run(tc, rng) match {
-      case Passed => that.run(tc, rng)
+    (ms, tc, rng) => Prop.this.run(ms, tc, rng) match {
+      case Passed => that.run(ms, tc, rng)
       case f => f
     }
   )
 
   def ||(that: Prop): Prop = new Prop(
-    (tc: TestCases, rng) =>
-      Prop.this.run(tc, rng) match {
-        case f: Falsified => that.run(tc, rng)
+    (ms, tc, rng) =>
+      Prop.this.run(ms, tc, rng) match {
+        case f: Falsified => that.run(ms, tc, rng)
         case x => x
       }
   )
 
   def tag(tag: String): Prop = new Prop(
-    (tc, rng) =>
-      Prop.this.run(tc, rng) match {
+    (ms, tc, rng) =>
+      Prop.this.run(ms, tc, rng) match {
         case f: Falsified => Falsified(s"${tag} ${f.failure}", f.successes)
         case x => x
       }
@@ -50,6 +51,7 @@ case class Prop(run: (TestCases, RNG) => Result) {
 }
 
 object Prop {
+  type MaxSize = Int
   type TestCases = Int
 
   type FailedCase = String
@@ -63,6 +65,23 @@ object Prop {
       s"generated an exception: ${e.getMessage}\n" +
       s"stack trace:\n ${e.getStackTrace.mkString("\n")}"
 
+  def forAll[A](g: SGen[A])(f: A => Boolean): Prop = forAll(g(_))(f)
+
+  def forAll[A](g: Int => Gen[A])(f: A => Boolean): Prop = Prop {
+    (max, n, rng) =>
+      val casesPerSize = (n + (max - 1)) / max
+      val props: Stream[Prop] =
+        Stream.from(0).take((n min max) + 1).map(i => forAll(g(i))(f))
+      val prop: Prop =
+        props.map(p => Prop { (max, _, rng) =>
+          p.run(max, casesPerSize, rng)
+        }).toList.reduce(_ && _)
+      prop.run(max, n, rng)
+  }
+
+  def apply(f: (TestCases, RNG) => Result): Prop =
+    Prop { (_, n, rng) => f(n, rng) }
+
   def forAll[A](as: Gen[A])(f: A => Boolean): Prop = Prop {
     (n, rng) => randomStream(as)(rng).zip(Stream.from(0)).take(n).map {
       case (a, i) => try {
@@ -72,6 +91,15 @@ object Prop {
       }
     }.find(_.isFalsified).getOrElse(Passed)
   }
+
+  def run(p: Prop,
+          maxSize: Int = 100,
+          testCases: Int = 100,
+          rng: RNG = RNG.Simple(System.currentTimeMillis)): Unit =
+    p.run(maxSize, testCases, rng) match {
+      case Falsified(msg, n) => println(s"! Falsified after $n spassed tests:\n $msg")
+      case Passed => println(s"+ OK, passed $testCases tests.")
+    }
 }
 
 
@@ -81,6 +109,8 @@ object Gen {
   def listOfN[A](n: Int, g: Gen[A]): Gen[List[A]] = Gen(State.sequence(List.fill(n)(g.sample)))
 
   def listOf[A](g: Gen[A]): SGen[List[A]] = SGen(n => g.listOfN(n))
+
+  def listOf1[A](g: Gen[A]) = SGen( n => g.listOfN(n max 1))
 
   def boolean: Gen[Boolean] = Gen(State(RNG.boolean))
 
