@@ -79,5 +79,16 @@ class GenSpec extends FlatSpec with Matchers {
   "Exercise 8.5 Gen.flatmap" should "compile" in {
     val value = Gen.unit(10).flatMap((i: Int) => Gen.unit(i + 10))
   }
+
+  "Exercise 8.13 Gen.listOf1" should "compile" in {
+    val smallInt = Gen.choose(0, 100)
+
+    val maxProp1 = Prop.forAll(Gen.listOf1(smallInt)) { l =>
+      val max = l.max
+      !l.exists(_ > max) // No value greater than `max` should exist in `l`
+    }
+
+    Prop.run(maxProp1)
+  }
 }
 
