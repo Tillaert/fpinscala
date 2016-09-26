@@ -82,7 +82,7 @@ class GenSpec extends FlatSpec with Matchers {
 
   "Exercise 8.13 maxProp" should "pass" in {
     val smallInt = Gen.choose(-10, 10)
-    val maxProp = Prop.forAll(Gen.listOf(smallInt)) {
+    val maxProp = Prop.forAll(Gen.listOf1(smallInt)) {
       ns => {
         val max = ns.max
         !ns.exists(_ > max)
@@ -90,6 +90,31 @@ class GenSpec extends FlatSpec with Matchers {
     }
 
     Prop.run(maxProp)
+  }
+
+  "Exercise 8.14 sorted" should "sort stuff" in {
+    import Prop._
+    import Gen._
+    import SGen._
+
+    val smallInt = Gen.choose(-10, 10)
+
+    val sortedProp = forAll(listOf(smallInt)) { ns =>
+      val nss = ns.sorted
+      // We specify that every sorted list is either empty, has one element,
+      // or has no two consecutive elements `(a,b)` such that `a` is greater than `b`.
+      (nss.isEmpty || nss.tail.isEmpty || !nss.zip(nss.tail).exists {
+        case (a, b) => a > b
+      })
+    } && forAll(listOf1(smallInt)) { ns =>
+      val nss = ns.sorted
+      ! ns.exists(!nss.contains(_))
+    } && forAll(listOf1(smallInt)) { ns =>
+      val nss = ns.sorted
+      ! nss.exists(!ns.contains(_))
+    }
+
+    Prop.run(sortedProp)
   }
 }
 

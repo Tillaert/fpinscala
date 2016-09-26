@@ -91,7 +91,7 @@ object Prop {
           testCases: Int = 100,
           rng: RNG = RNG.Simple(System.currentTimeMillis)): Unit =
     p.run(maxSize, testCases, rng) match {
-      case Falsified(msg, n) => println(s"! Falsified afer $n passed tests: \n $msg")
+      case Falsified(msg, n) => throw new Exception(s"! Falsified afer $n passed tests: \n $msg")
       case Passed => println(s"+ OK, passes $testCases tests.")
     }
 }
