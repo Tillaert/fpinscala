@@ -3,7 +3,8 @@ package fpinscala.testing
 import fpinscala.state.State
 import fpinscala.state.RNG
 import fpinscala.laziness.Stream
-import fpinscala.testing.Prop._
+import fpinscala.testing.Prop.{FailedCase, SuccessCount, TestCases}
+import Prop._
 
 /*
 The library developed in this chapter goes through several iterations. This file is just the
@@ -22,28 +23,24 @@ case class Falsified(failure: FailedCase, successes: SuccessCount) extends Resul
   def isFalsified: Boolean = true
 }
 
-
 case class Prop(run: (MaxSize, TestCases, RNG) => Result) {
-  def check: Either[(FailedCase, SuccessCount), SuccessCount] = ???
-
-  def &&(that: Prop): Prop = new Prop(
-    (ms, tc, rng) => Prop.this.run(ms, tc, rng) match {
-      case Passed => that.run(ms, tc, rng)
+  def &&(that: Prop): Prop = Prop {
+    (max, tc, rng) => run(max, tc, rng) match {
+      case Passed => that.run(max, tc, rng)
       case f => f
     }
-  )
+  }
 
-  def ||(that: Prop): Prop = new Prop(
-    (ms, tc, rng) =>
-      Prop.this.run(ms, tc, rng) match {
-        case f: Falsified => that.run(ms, tc, rng)
-        case x => x
-      }
-  )
+  def ||(that: Prop): Prop = Prop {
+    (max, tc, rng) => run(max, tc, rng) match {
+      case f: Falsified => that.run(max, tc, rng)
+      case x => x
+    }
+  }
 
   def tag(tag: String): Prop = new Prop(
-    (ms, tc, rng) =>
-      Prop.this.run(ms, tc, rng) match {
+    (max, tc, rng) =>
+      Prop.this.run(max, tc, rng) match {
         case f: Falsified => Falsified(s"${tag} ${f.failure}", f.successes)
         case x => x
       }
@@ -51,8 +48,8 @@ case class Prop(run: (MaxSize, TestCases, RNG) => Result) {
 }
 
 object Prop {
-  type MaxSize = Int
   type TestCases = Int
+  type MaxSize = Int
 
   type FailedCase = String
   type SuccessCount = Int
@@ -64,6 +61,16 @@ object Prop {
     s"test case: $s\n" +
       s"generated an exception: ${e.getMessage}\n" +
       s"stack trace:\n ${e.getStackTrace.mkString("\n")}"
+
+  def forAll[A](as: Gen[A])(f: A => Boolean): Prop = Prop {
+    (_, n, rng) => randomStream(as)(rng).zip(Stream.from(0)).take(n).map {
+      case (a, i) => try {
+        if (f(a)) Passed else Falsified(a.toString, i)
+      } catch {
+        case e: Exception => Falsified(buildMsg(a, e), i)
+      }
+    }.find(_.isFalsified).getOrElse(Passed)
+  }
 
   def forAll[A](g: SGen[A])(f: A => Boolean): Prop = forAll(g(_))(f)
 
@@ -79,26 +86,13 @@ object Prop {
       prop.run(max, n, rng)
   }
 
-  def apply(f: (TestCases, RNG) => Result): Prop =
-    Prop { (_, n, rng) => f(n, rng) }
-
-  def forAll[A](as: Gen[A])(f: A => Boolean): Prop = Prop {
-    (n, rng) => randomStream(as)(rng).zip(Stream.from(0)).take(n).map {
-      case (a, i) => try {
-        if (f(a)) Passed else Falsified(a.toString, i)
-      } catch {
-        case e: Exception => Falsified(buildMsg(a, e), i)
-      }
-    }.find(_.isFalsified).getOrElse(Passed)
-  }
-
   def run(p: Prop,
           maxSize: Int = 100,
           testCases: Int = 100,
           rng: RNG = RNG.Simple(System.currentTimeMillis)): Unit =
     p.run(maxSize, testCases, rng) match {
-      case Falsified(msg, n) => println(s"! Falsified after $n spassed tests:\n $msg")
-      case Passed => println(s"+ OK, passed $testCases tests.")
+      case Falsified(msg, n) => throw new Exception(s"! Falsified afer $n passed tests: \n $msg")
+      case Passed => println(s"+ OK, passes $testCases tests.")
     }
 }
 
@@ -110,7 +104,7 @@ object Gen {
 
   def listOf[A](g: Gen[A]): SGen[List[A]] = SGen(n => g.listOfN(n))
 
-  def listOf1[A](g: Gen[A]) = SGen( n => g.listOfN(n max 1))
+  def listOf1[A](g: Gen[A]): SGen[List[A]] = SGen(n => g.listOfN(n max 1))
 
   def boolean: Gen[Boolean] = Gen(State(RNG.boolean))
 
@@ -130,6 +124,8 @@ object Gen {
 case class Gen[+A](sample: State[RNG, A]) {
   def map[B](f: A => B): Gen[B] = Gen(this.sample.map(a => f(a)))
 
+  def map2[B, C](g: Gen[B])(f: (A, B) => C): Gen[C] = Gen(sample.map2(g.sample)(f))
+
   def flatMap[B](f: A => Gen[B]): Gen[B] = Gen(sample.flatMap(a => f(a).sample))
 
   def listOfN(n: Int): Gen[List[A]] = Gen.listOfN(n, this)
@@ -137,6 +133,9 @@ case class Gen[+A](sample: State[RNG, A]) {
   def listOfN(size: Gen[Int]): Gen[List[A]] = size flatMap (s => this.listOfN(s))
 
   def unsized: SGen[A] = SGen(_ => this)
+
+  def **[B](g: Gen[B]): Gen[(A, B)] =
+    (this map2 g) ((_, _))
 }
 
 case class SGen[+A](g: Int => Gen[A]) {
@@ -144,12 +143,10 @@ case class SGen[+A](g: Int => Gen[A]) {
 
   def map[B](f: A => B): SGen[B] = SGen(g(_) map f)
 
-  def flatMap[B](f: A => SGen[B]): SGen[B] = {
-    val g2: Int => Gen[B] = n =>
-      g(n) flatMap (f(_).g(n))
-    SGen(g2)
-  }
+  def flatMap[B](f: A => SGen[B]): SGen[B] =
+    SGen(n => g(n) flatMap (f(_)(n)))
 
-
+  def **[B](s2: SGen[B]): SGen[(A, B)] =
+    SGen(n => apply(n) ** s2(n))
 }
 

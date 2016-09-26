@@ -80,27 +80,38 @@ class GenSpec extends FlatSpec with Matchers {
     val value = Gen.unit(10).flatMap((i: Int) => Gen.unit(i + 10))
   }
 
-  "Exercise 8.13 Gen.listOf1" should "compile" in {
-    val smallInt = Gen.choose(0, 100)
-
-    val maxProp1 = Prop.forAll(Gen.listOf1(smallInt)) { l =>
-      val max = l.max
-      !l.exists(_ > max) // No value greater than `max` should exist in `l`
+  "Exercise 8.13 maxProp" should "pass" in {
+    val smallInt = Gen.choose(-10, 10)
+    val maxProp = Prop.forAll(Gen.listOf1(smallInt)) {
+      ns => {
+        val max = ns.max
+        !ns.exists(_ > max)
+      }
     }
 
-    Prop.run(maxProp1)
+    Prop.run(maxProp)
   }
 
-  "Exercise 8.14 List.sorted" should "be tested" in {
-    val smallInt = Gen.choose(0, 100)
+  "Exercise 8.14 sorted" should "sort stuff" in {
+    import Prop._
+    import Gen._
+    import SGen._
 
-    val sortedProp = Prop.forAll(Gen.listOf(smallInt)) { ns =>
+    val smallInt = Gen.choose(-10, 10)
+
+    val sortedProp = forAll(listOf(smallInt)) { ns =>
       val nss = ns.sorted
       // We specify that every sorted list is either empty, has one element,
       // or has no two consecutive elements `(a,b)` such that `a` is greater than `b`.
       (nss.isEmpty || nss.tail.isEmpty || !nss.zip(nss.tail).exists {
         case (a, b) => a > b
       })
+    } && forAll(listOf1(smallInt)) { ns =>
+      val nss = ns.sorted
+      ! ns.exists(!nss.contains(_))
+    } && forAll(listOf1(smallInt)) { ns =>
+      val nss = ns.sorted
+      ! nss.exists(!ns.contains(_))
     }
 
     Prop.run(sortedProp)
