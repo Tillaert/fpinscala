@@ -115,6 +115,10 @@ object Gen {
 
   def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] = boolean.flatMap(b => if (b) g1 else g2)
 
+  def stringN(n: Int): Gen[String] =
+    listOfN(n, choose(0,127)).map(_.map(_.toChar).mkString)
+
+
   def weighted[A](g1: (Gen[A], Double), g2: (Gen[A], Double)): Gen[A] = {
     val threshold = g1._2.abs / (g1._2.abs + g2._2.abs)
     double.flatMap(d => if (d < threshold) g1._1 else g2._1)
