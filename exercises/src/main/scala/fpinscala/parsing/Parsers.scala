@@ -23,7 +23,8 @@ trait Parsers[ParseError, Parser[+ _]] {
 
   def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]]
 
-  def many[A](p: Parser[A]): Parser[List[A]]
+  def many[A](p: Parser[A]): Parser[List[A]] =
+    map2(p, many(p))(_ :: _) or succeed(List[A]())
 
   def map[A, B](a: Parser[A])(f: A => B): Parser[B]
 
@@ -33,11 +34,11 @@ trait Parsers[ParseError, Parser[+ _]] {
 
   def product[A, B](p: Parser[A], p2: Parser[B]): Parser[(A, B)]
 
-  def map2[A,B,C](p: Parser[A], p2: Parser[B])(f: (A,B) => C) : Parser[C] =
-    map(product(p,p2))(f.tupled)
+  def map2[A, B, C](p: Parser[A], p2: Parser[B])(f: (A, B) => C): Parser[C] =
+    map(product(p, p2))(f.tupled)
 
   def many1[A](p: Parser[A]): Parser[List[A]] =
-    map2(p, many(p))( _ :: _ )
+    map2(p, many(p))(_ :: _)
 
   case class ParserOps[A](p: Parser[A]) {
     def |[B >: A](p2: Parser[B]): Parser[B] = self.or(p, p2)
@@ -62,7 +63,7 @@ trait Parsers[ParseError, Parser[+ _]] {
       equal(p, p.map(a => a))(in)
 
     def productLaw[A](p: Parser[A], p2: Parser[A], p3: Parser[A])(in: Gen[String]): Prop =
-      equal((p ** p2) ** p3, p ** ( p2 ** p3 ))(in)
+      equal((p ** p2) ** p3, p ** (p2 ** p3))(in)
   }
 
 }
