@@ -21,7 +21,11 @@ trait Parsers[ParseError, Parser[+ _]] {
   implicit def asStringPerser[A](a: A)(implicit f: A => Parser[String]): ParserOps[String] =
     ParserOps(f(a))
 
-  def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]]
+  def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] =
+    if( n <= 0 )
+      succeed(List())
+    else
+      map2(p,listOfN(n-1,p))(_::_)
 
   def many[A](p: Parser[A]): Parser[List[A]] =
     map2(p, many(p))(_ :: _) or succeed(List[A]())
