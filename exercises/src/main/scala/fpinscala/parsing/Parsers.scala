@@ -61,6 +61,8 @@ trait Parsers[ParseError, Parser[+ _]] {
     def mapLaw[A](p: Parser[A])(in: Gen[String]): Prop =
       equal(p, p.map(a => a))(in)
 
+    def productLaw[A](p: Parser[A], p2: Parser[A], p3: Parser[A])(in: Gen[String]): Prop =
+      equal((p ** p2) ** p3, p ** ( p2 ** p3 ))(in)
   }
 
 }
