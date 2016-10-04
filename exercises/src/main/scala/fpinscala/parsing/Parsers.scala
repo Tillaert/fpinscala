@@ -3,6 +3,7 @@ package fpinscala.parsing
 import fpinscala.testing._
 
 import scala.language.{higherKinds, implicitConversions}
+import scala.util.matching.Regex
 
 
 trait Parsers[ParseError, Parser[+ _]] {
@@ -12,7 +13,7 @@ trait Parsers[ParseError, Parser[+ _]] {
 
   def char(c: Char): Parser[Char] = string(c.toString) map (_.charAt(0))
 
-  def or[A](s1: Parser[A], s2: Parser[A]): Parser[A]
+  def or[A](s1: Parser[A], s2: => Parser[A]): Parser[A]
 
   implicit def string(s: String): Parser[String]
 
@@ -21,11 +22,13 @@ trait Parsers[ParseError, Parser[+ _]] {
   implicit def asStringPerser[A](a: A)(implicit f: A => Parser[String]): ParserOps[String] =
     ParserOps(f(a))
 
+  implicit def regex(r: Regex): Parser[String]
+
   def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] =
-    if( n <= 0 )
+    if (n <= 0)
       succeed(List())
     else
-      map2(p,listOfN(n-1,p))(_::_)
+      map2(p, listOfN(n - 1, p))(_ :: _)
 
   def many[A](p: Parser[A]): Parser[List[A]] =
     map2(p, many(p))(_ :: _) or succeed(List[A]())
@@ -44,6 +47,8 @@ trait Parsers[ParseError, Parser[+ _]] {
   def many1[A](p: Parser[A]): Parser[List[A]] =
     map2(p, many(p))(_ :: _)
 
+  def flatMap[A, B](p: Parser[A])(f: A => Parser[B]): Parser[B]
+
   case class ParserOps[A](p: Parser[A]) {
     def |[B >: A](p2: Parser[B]): Parser[B] = self.or(p, p2)
 
@@ -54,6 +59,8 @@ trait Parsers[ParseError, Parser[+ _]] {
     def product[B](p2: Parser[B]) = self.product(p, p2)
 
     def **[B](p2: Parser[B]) = self.product(p, p2)
+
+    def flatMap[B](f: A => Parser[B]) = self.flatMap(p)(f)
   }
 
   object Laws {
