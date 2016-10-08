@@ -11,15 +11,33 @@ trait Parsers[ParseError, Parser[+ _]] {
   // so inner classes may call methods of trait
   def run[A](p: Parser[A])(input: String): Either[ParseError, A]
 
+  def whitespace: Parser[String] = "\\s*".r
+
   def char(c: Char): Parser[Char] = string(c.toString) map (_.charAt(0))
 
   def or[A](s1: Parser[A], s2: => Parser[A]): Parser[A]
 
   implicit def string(s: String): Parser[String]
 
+  def quotedString = surround("\"", "\"")( token(".".r) map (_.toString) )
+
+  /** C/Java style floating point literals, e.g .1, -1.0, 1e9, 1E-23, etc.
+    * Result is left as a string to keep full precision
+    */
+  def doubleString: Parser[String] =
+  token("[-+]?([0-9]*\\.)?[0-9]+([eE][-+]?[0-9]+)?".r)
+
+  /** Floating point literals, converted to a `Double`. */
+  def double: Parser[Double] =
+  doubleString map (_.toDouble)
+
+  /** Attempts `p` and strips trailing whitespace, usually used for the tokens of a grammar. */
+  def token[A](p: Parser[A]): Parser[A] =
+    p <* whitespace
+
   implicit def operators[A](p: Parser[A]): ParserOps[A] = ParserOps[A](p)
 
-  implicit def asStringPerser[A](a: A)(implicit f: A => Parser[String]): ParserOps[String] =
+  implicit def asStringParser[A](a: A)(implicit f: A => Parser[String]): ParserOps[String] =
     ParserOps(f(a))
 
   implicit def regex(r: Regex): Parser[String]
@@ -50,12 +68,27 @@ trait Parsers[ParseError, Parser[+ _]] {
     for {
       v <- p
       v2 <- p2
-    } yield f(v,v2)
+    } yield f(v, v2)
 
   def many1[A](p: Parser[A]): Parser[List[A]] =
     map2(p, many(p))(_ :: _)
 
   def flatMap[A, B](p: Parser[A])(f: A => Parser[B]): Parser[B]
+
+  def skipL[A, B](p: Parser[A], p2: Parser[B]): Parser[B] =
+    map2(p, p2)((_, b) => b)
+
+  def skipR[A, B](p: Parser[A], p2: Parser[B]): Parser[A] =
+    map2(p, p2)((a, _) => a)
+
+  def surround[A](start: Parser[Any], stop: Parser[Any])(p: Parser[A]) =
+    start *> p <* stop
+
+  def sep[A](p: Parser[A], p2: Parser[Any]) =
+    sep1(p, p2) or succeed(List())
+
+  def sep1[A](p: Parser[A], p2: Parser[Any]): Parser[List[A]] =
+    map2(p, many(p2 *> p))(_ :: _)
 
   case class ParserOps[A](p: Parser[A]) {
     def |[B >: A](p2: Parser[B]): Parser[B] = self.or(p, p2)
@@ -69,6 +102,18 @@ trait Parsers[ParseError, Parser[+ _]] {
     def **[B](p2: Parser[B]) = self.product(p, p2)
 
     def flatMap[B](f: A => Parser[B]) = self.flatMap(p)(f)
+
+    def many = self.many(p)
+
+    def slice = self.slice(p)
+
+    def *>[B](p2: Parser[B]) = self.skipL(p, p2)
+
+    def <*[B](p2: Parser[B]) = self.skipR(p, p2)
+
+    def sep(s: Parser[Any]) = self.sep(p, s)
+
+    def as[B](b: B): Parser[B] = self.map(self.slice(p))(_ => b)
   }
 
   object Laws {
