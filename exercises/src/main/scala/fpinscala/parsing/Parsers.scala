@@ -5,8 +5,7 @@ import fpinscala.testing._
 import scala.language.{higherKinds, implicitConversions}
 import scala.util.matching.Regex
 
-
-trait Parsers[ParseError, Parser[+ _]] {
+trait Parsers[Parser[+ _]] {
   self =>
   // so inner classes may call methods of trait
   def run[A](p: Parser[A])(input: String): Either[ParseError, A]
@@ -41,6 +40,18 @@ trait Parsers[ParseError, Parser[+ _]] {
     ParserOps(f(a))
 
   implicit def regex(r: Regex): Parser[String]
+
+  def scope[A](msg: String)(p: Parser[A]): Parser[A]
+
+  def label[A](msg: String)(p: Parser[A]): Parser[A]
+
+  def attempt[A](p: Parser[A]): Parser[A]
+
+  /** In the event of an error, returns the error that occurred after consuming the most number of characters. */
+  def furthest[A](p: Parser[A]): Parser[A]
+
+  /** In the event of an error, returns the error that occurred most recently. */
+  def latest[A](p: Parser[A]): Parser[A]
 
   def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] =
     if (n <= 0)
@@ -90,6 +101,10 @@ trait Parsers[ParseError, Parser[+ _]] {
   def sep1[A](p: Parser[A], p2: Parser[Any]): Parser[List[A]] =
     map2(p, many(p2 *> p))(_ :: _)
 
+  def errorMessage(e: ParseError): String
+
+  def errorLocation(e: ParseError): Location
+
   case class ParserOps[A](p: Parser[A]) {
     def |[B >: A](p2: Parser[B]): Parser[B] = self.or(p, p2)
 
@@ -128,14 +143,24 @@ trait Parsers[ParseError, Parser[+ _]] {
 
     def productLaw[A](p: Parser[A], p2: Parser[A], p3: Parser[A])(in: Gen[String]): Prop =
       equal((p ** p2) ** p3, p ** (p2 ** p3))(in)
-  }
 
+    def labelLaw[A](p: Parser[A], inputs: SGen[String]): Prop =
+      forAll(inputs ** Gen.string) { case (input, msg) =>
+        run(label(msg)(p))(input) match {
+          case Left(e) => errorMessage(e) == msg
+          case _ => true
+        }
+      }
+  }
 }
 
 case class Location(input: String, offset: Int = 0) {
 
   lazy val line = input.slice(0, offset + 1).count(_ == '\n') + 1
-  lazy val col = input.slice(0, offset + 1).reverse.indexOf('\n')
+  lazy val col = input.slice(0, offset + 1).lastIndexOf('\n') match {
+    case -1 => offset + 1
+    case lineStart => offset - lineStart
+  }
 
   def toError(msg: String): ParseError =
     ParseError(List((this, msg)))

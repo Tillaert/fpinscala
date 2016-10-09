@@ -41,7 +41,7 @@ case class Prop(run: (MaxSize, TestCases, RNG) => Result) {
   def tag(tag: String): Prop = new Prop(
     (max, tc, rng) =>
       Prop.this.run(max, tc, rng) match {
-        case f: Falsified => Falsified(s"${tag} ${f.failure}", f.successes)
+        case f: Falsified => Falsified(s"$tag ${f.failure}", f.successes)
         case x => x
       }
   )
@@ -114,6 +114,8 @@ object Gen {
     Gen(State(RNG.nonNegativeInt).map((v: Int) => lb + v % (ub - lb)))
 
   def union[A](g1: Gen[A], g2: Gen[A]): Gen[A] = boolean.flatMap(b => if (b) g1 else g2)
+
+  val string: SGen[String] = SGen(stringN)
 
   def stringN(n: Int): Gen[String] =
     listOfN(n, choose(0,127)).map(_.map(_.toChar).mkString)
