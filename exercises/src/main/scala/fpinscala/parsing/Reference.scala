@@ -6,7 +6,12 @@ import scala.util.matching.Regex
 object ReferenceTypes {
   type Parser[+A] = Location => Result[A]
 
-  trait Result[+A]
+  trait Result[+A] {
+    def mapError(f: ParseError => ParseError): Result[A] = this match {
+      case Failure(e) => Failure(f(e))
+      case _ => this
+    }
+  }
 
   case class Success[+A](get: A, charsConumed: Int) extends Result[A]
 
@@ -40,4 +45,34 @@ object Reference extends Parsers[Parser] {
       case Success( _, cs ) => Success( l.input.substring(l.offset, l.offset + cs), cs )
       case f:Failure => f
     }
+
+  def attempt[A](p: Parser[A]): Parser[A] = ???
+
+  def errorLocation(e: ParseError): Location = ???
+
+  def errorMessage(e: ParseError): String = ???
+
+  def flatMap[A, B](p: Parser[A])(f: (A) => Parser[B]): Parser[B] =
+    s => p(s) match {
+      case Success(a, n) => f(a)(s.advanceBy(n))
+      case g@Failure(_) => g
+    }
+
+  def label[A](msg: String)(p: Parser[A]): Parser[A] =
+    s => p(s).mapError(_.label(msg))
+
+  def or[A](p1: Parser[A], p2: => Parser[A]): Parser[A] =
+    s => p1(s) match {
+      case Failure(_) => p2(s)
+      case r => r // committed failure or success skips running `p2`
+    }
+
+  def run[A](p: Parser[A])(input: String): Either[ParseError, A] = ???
+
+  def furthest[A](p: Parser[A]): Parser[A] = ???
+
+  def latest[A](p: Parser[A]): Parser[A] = ???
+
+  def scope[A](msg: String)(p: Parser[A]): Parser[A] =
+    s => p(s).mapError(_.push(s,msg))
 }

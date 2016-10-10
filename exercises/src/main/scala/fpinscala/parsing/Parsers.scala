@@ -18,7 +18,7 @@ trait Parsers[Parser[+ _]] {
 
   implicit def string(s: String): Parser[String]
 
-  def quotedString = surround("\"", "\"")( token(".".r) map (_.toString) )
+  def quotedString = surround("\"", "\"")(token(".".r) map (_.toString))
 
   /** C/Java style floating point literals, e.g .1, -1.0, 1e9, 1E-23, etc.
     * Result is left as a string to keep full precision
@@ -32,7 +32,7 @@ trait Parsers[Parser[+ _]] {
 
   /** Attempts `p` and strips trailing whitespace, usually used for the tokens of a grammar. */
   def token[A](p: Parser[A]): Parser[A] =
-    p <* whitespace
+  p <* whitespace
 
   implicit def operators[A](p: Parser[A]): ParserOps[A] = ParserOps[A](p)
 
@@ -152,6 +152,7 @@ trait Parsers[Parser[+ _]] {
         }
       }
   }
+
 }
 
 case class Location(input: String, offset: Int = 0) {
@@ -175,4 +176,15 @@ case class Location(input: String, offset: Int = 0) {
 
 case class ParseError(stack: List[(Location, String)] = List(),
                       otherFailures: List[ParseError] = List()) {
+  def push(loc: Location, msg: String): ParseError =
+    copy(stack = (loc, msg) :: stack)
+
+  def label[A](s: String): ParseError =
+    ParseError(latestLoc.map((_, s)).toList)
+
+  def latestLoc: Option[Location] =
+    latest map (_._1)
+
+  def latest: Option[(Location, String)] =
+    stack.lastOption
 }
