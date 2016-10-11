@@ -19,15 +19,15 @@ object JSON {
 
     def obj: Parser[JSON] = surround("{", "}")(keyval sep "," map (kvs => JObject(kvs.toMap)))
     def array: Parser[JSON] = surround("[", "]")(value sep "," map (vs => JArray(vs.toIndexedSeq)))
-    def keyval = quotedString ** (":" *> obj)
+    def keyval = escapedQuoted ** (":" *> obj)
     def lit: Parser[JSON] =
       "null".as(JNull) |
       double.map(JNumber) |
-      quotedString.map(JString) |
+        escapedQuoted.map(JString) |
       "true".as(JBool(true)) |
       "false".as(JBool(false))
 
-    def value = array | obj | lit
+    def value = lit | obj | array
 
 
     array | obj

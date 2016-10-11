@@ -1,5 +1,8 @@
 package fpinscala.parsing
 
+import java.util.regex.Pattern
+
+import fpinscala.parsing.ReferenceTypes.Failure
 import fpinscala.testing._
 
 import scala.language.{higherKinds, implicitConversions}
@@ -18,21 +21,31 @@ trait Parsers[Parser[+ _]] {
 
   implicit def string(s: String): Parser[String]
 
-  def quotedString = surround("\"", "\"")(token(".".r) map (_.toString))
+  /** Parser which consumes reluctantly until it encounters the given string. */
+  def thru(s: String): Parser[String] = (".*?"+Pattern.quote(s)).r
+
+  /** Unescaped string literals, like "foo" or "bar". */
+  def quoted: Parser[String] = string("\"") *> thru("\"").map(_.dropRight(1))
+
+  /** Unescaped or escaped string literals, like "An \n important \"Quotation\"" or "bar". */
+  def escapedQuoted: Parser[String] =
+  // rather annoying to write, left as an exercise
+  // we'll just use quoted (unescaped literals) for now
+  token(quoted)
 
   /** C/Java style floating point literals, e.g .1, -1.0, 1e9, 1E-23, etc.
     * Result is left as a string to keep full precision
     */
   def doubleString: Parser[String] =
-  token("[-+]?([0-9]*\\.)?[0-9]+([eE][-+]?[0-9]+)?".r)
+    token("[-+]?([0-9]*\\.)?[0-9]+([eE][-+]?[0-9]+)?".r)
 
   /** Floating point literals, converted to a `Double`. */
   def double: Parser[Double] =
-  doubleString map (_.toDouble)
+    doubleString map (_.toDouble)
 
   /** Attempts `p` and strips trailing whitespace, usually used for the tokens of a grammar. */
   def token[A](p: Parser[A]): Parser[A] =
-  p <* whitespace
+    p //<* whitespace
 
   implicit def operators[A](p: Parser[A]): ParserOps[A] = ParserOps[A](p)
 
@@ -166,7 +179,8 @@ case class Location(input: String, offset: Int = 0) {
   def toError(msg: String): ParseError =
     ParseError(List((this, msg)))
 
-  def advanceBy(n: Int) = copy(offset = offset + n)
+  def advanceBy(n: Int) =
+    copy(offset = offset + n)
 
   /* Returns the line corresponding to this location */
   def currentLine: String =
