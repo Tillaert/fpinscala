@@ -47,8 +47,8 @@ object Reference extends Parsers[Parser] {
     val msg = "'" + s + "'"
     l =>
       l.input.substring(l.offset).startsWith(s) match {
-      case true => Success(s, s.length)
-      case false => Failure(l.toError(msg), isCommitted = false)
+        case true => Success(s, s.length)
+        case false => Failure(l.toError(msg), isCommitted = false)
     }
   }
 
@@ -62,7 +62,7 @@ object Reference extends Parsers[Parser] {
     }
   }
 
-  override def succeed[A](a: A): Parser[A] = succeed(a)
+  override def succeed[A](a: A): Parser[A] = s => Success(a,0)
 
   def slice[A](p: Parser[A]): Parser[String] =
     l => p(l) match {
@@ -77,12 +77,12 @@ object Reference extends Parsers[Parser] {
 
   def errorMessage(e: ParseError): String = ???
 
-  def flatMap[A, B](p: Parser[A])(f: (A) => Parser[B]): Parser[B] =
-    s => p(s) match {
-      case Success(a, n) => f(a)(s.advanceBy(n))
+  def flatMap[A,B](f: Parser[A])(g: A => Parser[B]): Parser[B] =
+    s => f(s) match {
+      case Success(a,n) => g(a)(s.advanceBy(n))
         .addCommit(n != 0)
         .advanceSuccess(n)
-      case g@Failure(_, _) => g
+      case f@Failure(_,_) => f
     }
 
   def label[A](msg: String)(p: Parser[A]): Parser[A] =
