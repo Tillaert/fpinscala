@@ -119,15 +119,15 @@ trait Parsers[Parser[+ _]] {
   def errorLocation(e: ParseError): Location
 
   case class ParserOps[A](p: Parser[A]) {
-    def |[B >: A](p2: Parser[B]): Parser[B] = self.or(p, p2)
+    def |[B >: A](p2: => Parser[B]): Parser[B] = self.or(p, p2)
 
     def or[B >: A](p2: => Parser[B]): Parser[B] = self.or(p, p2)
 
     def map[B](f: A => B) = self.map(p)(f)
 
-    def product[B](p2: Parser[B]) = self.product(p, p2)
+    def product[B](p2: => Parser[B]) = self.product(p, p2)
 
-    def **[B](p2: Parser[B]) = self.product(p, p2)
+    def **[B](p2: => Parser[B]) = self.product(p, p2)
 
     def flatMap[B](f: A => Parser[B]) = self.flatMap(p)(f)
 
@@ -135,9 +135,9 @@ trait Parsers[Parser[+ _]] {
 
     def slice = self.slice(p)
 
-    def *>[B](p2: Parser[B]) = self.skipL(p, p2)
+    def *>[B](p2: => Parser[B]) = self.skipL(p, p2)
 
-    def <*[B](p2: Parser[B]) = self.skipR(p, p2)
+    def <*[B](p2: => Parser[B]) = self.skipR(p, p2)
 
     def sep(s: Parser[Any]) = self.sep(p, s)
 

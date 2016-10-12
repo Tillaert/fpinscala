@@ -6,7 +6,7 @@ import fpinscala.testing._
 class ParsersSpec extends FlatSpec with Matchers {
 
   val P = fpinscala.parsing.Reference
-  //val json = JSON.jsonParser(P)
+  val json = JSON.jsonParser(P)
 
   "doubleString" should "be parsed" in {
     val doubleTxt = "3.14"
@@ -39,11 +39,11 @@ class ParsersSpec extends FlatSpec with Matchers {
     Prop.run(Reference.Laws.mapLaw(P.double)(doubleGen))
   }
 
-  /*
+
   "SimpleObject" should " equal Right(k:v)" in {
     val jsonTxt = """{"foo":"bar"}"""
-    P.run(P.JSON)(jsonTxt) == Right(Map(("foo", "Bar")))
-  }*/
+    P.run(json)(jsonTxt) should be ( Right(JSON.JObject(Map(("foo", JSON.JString("bar"))))))
+  }
 
   "or" should "resolve right hand side" in {
     // run("abra" | "cadabra")("abra") == Right("cadabra")
