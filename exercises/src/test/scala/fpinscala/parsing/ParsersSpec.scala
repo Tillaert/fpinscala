@@ -28,9 +28,10 @@ class ParsersSpec extends FlatSpec with Matchers {
   }
 
   "regex" should "equal match" in {
-    val jsonTxt = """["foobar"]"""
-    P.run(P.regex(".*?".r))(jsonTxt) should be( Right("foobar"))
+    val jsonTxt = """[foobar]"""
+    P.run(P.regex("^\\[([^\\]]*)\\]".r))(jsonTxt) should be( Right("[foobar]"))
   }
+
 
   /*"SimpleObject" should " equal Right(k:v)" in {
     val jsonTxt = """{"foo":"bar"}"""
