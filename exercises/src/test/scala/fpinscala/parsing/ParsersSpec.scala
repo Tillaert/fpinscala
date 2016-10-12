@@ -3,13 +3,10 @@ package fpinscala.parsing
 import org.scalatest.{FlatSpec, Matchers}
 import fpinscala.testing._
 
-
 class ParsersSpec extends FlatSpec with Matchers {
 
-  import fpinscala.parsing.ReferenceTypes.Parser
-
   val P = fpinscala.parsing.Reference
-  // val json: Parser[JSON] = JSON.jsonParser(P)
+  //val json = JSON.jsonParser(P)
 
   "doubleString" should "be parsed" in {
     val doubleTxt = "3.14"
@@ -32,10 +29,20 @@ class ParsersSpec extends FlatSpec with Matchers {
     P.run(P.regex("^\\[([^\\]]*)\\]".r))(jsonTxt) should be( Right("[foobar]"))
   }
 
+  "quotedString" should "equal match" in {
+    val quotedStr = "\"foobar\""
+    P.run(P.quoted)(quotedStr) should be( Right("foobar"))
+  }
 
-  /*"SimpleObject" should " equal Right(k:v)" in {
+  "mapLaw" should "apply to P.double" in {
+    val doubleGen = Gen.double.map(_.toString)
+    Prop.run(Reference.Laws.mapLaw(P.double)(doubleGen))
+  }
+
+  /*
+  "SimpleObject" should " equal Right(k:v)" in {
     val jsonTxt = """{"foo":"bar"}"""
-    P.run(json)(jsonTxt) == Right(Map(("foo", "Bar")))
+    P.run(P.JSON)(jsonTxt) == Right(Map(("foo", "Bar")))
   }*/
 
   "or" should "resolve right hand side" in {

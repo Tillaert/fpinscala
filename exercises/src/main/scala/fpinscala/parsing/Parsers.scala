@@ -22,7 +22,7 @@ trait Parsers[Parser[+ _]] {
   implicit def string(s: String): Parser[String]
 
   /** Parser which consumes reluctantly until it encounters the given string. */
-  def thru(s: String): Parser[String] = (".*?"+Pattern.quote(s)).r
+  def thru(s: String): Parser[String] = ("(.*?)"+Pattern.quote(s)).r
 
   /** Unescaped string literals, like "foo" or "bar". */
   def quoted: Parser[String] = string("\"") *> thru("\"").map(_.dropRight(1))
@@ -100,10 +100,10 @@ trait Parsers[Parser[+ _]] {
   def flatMap[A, B](p: Parser[A])(f: A => Parser[B]): Parser[B]
 
   def skipL[A, B](p: Parser[A], p2: Parser[B]): Parser[B] =
-    map2(p, p2)((_, b) => b)
+    map2(slice(p), p2)((_, b) => b)
 
   def skipR[A, B](p: Parser[A], p2: Parser[B]): Parser[A] =
-    map2(p, p2)((a, _) => a)
+    map2(p, slice(p2))((a, _) => a)
 
   def surround[A](start: Parser[Any], stop: Parser[Any])(p: Parser[A]) =
     start *> p <* stop
