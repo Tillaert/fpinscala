@@ -41,7 +41,10 @@ object Monoid {
     val zero = true
   }
 
-  def optionMonoid[A]: Monoid[Option[A]] = sys.error("todo")
+  def optionMonoid[A]: Monoid[Option[A]] = new Monoid[Option[A]] {
+    def op(a1: Option[A], a2: Option[A]) = a1 orElse a2
+    val zero = None
+  }
 
   def endoMonoid[A]: Monoid[A => A] = sys.error("todo")
 
@@ -86,7 +89,7 @@ object Monoid {
   def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = 
     sys.error("todo") 
 
-  val wcMonoid: Monoid[WC] = sys.error("todo")
+  val wcMonoid: Monoid[WC] = null // sys.error("todo")
 
   def count(s: String): Int = sys.error("todo")
 
