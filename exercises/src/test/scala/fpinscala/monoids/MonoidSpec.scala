@@ -56,4 +56,16 @@ class MonoidSpec extends FlatSpec with Matchers {
     m.op(s1, m.zero) should be(s1)
     m.op(m.zero, s2) should be(s2)
   }
+
+  "endoMonoid" should "obey monoid laws" in {
+    def f1 (i:Int) = i + 2
+    def f2 (i:Int) = i + 3
+    def f3 (i:Int) = i + 5
+
+    val m = Monoid.endoMonoid[Int]
+
+    m.op(f1,f2)(10) should be (15)
+    m.op(m.op(f1,f2),f3)(100) should be (m.op(f1,m.op(f2,f3))(100))
+    m.op(f1,m.zero)(10) should be(f1(10))
+  }
 }
