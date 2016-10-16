@@ -63,4 +63,10 @@ class MonoidSpec extends FlatSpec with Matchers {
 
     Monoid.foldLeft(l)(List[Int]())((b,a) => a :: b ) should be (List(1,2,3,4))
   }
+
+  "foldMapV" should "map and then fold using a monoid" in {
+    val numbers = List(1,2,3,4,5,6,7,8,9)
+
+    Monoid.foldMap(numbers,Monoid.stringMonoid)(_.toString) should be ("123456789")
+  }
 }
