@@ -52,4 +52,15 @@ class MonoidSpec extends FlatSpec with Matchers {
     Monoid.foldMap(numbers,Monoid.stringMonoid)(_.toString) should be ("123456789")
   }
 
+  "foldRight" should "be implemented via foldMap" in {
+    val l = List(1,2,3,4)
+
+    Monoid.foldRight(l)(List[Int]())( _ :: _ ) should be (List(4,3,2,1))
+  }
+
+  "foldLeft" should "be implemented via foldMap" in {
+    val l = List(1,2,3,4)
+
+    Monoid.foldLeft(l)(List[Int]())((b,a) => a :: b ) should be (List(1,2,3,4))
+  }
 }
