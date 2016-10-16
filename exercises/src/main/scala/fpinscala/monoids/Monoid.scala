@@ -106,8 +106,26 @@ object Monoid {
   }
 
 
-  def ordered(ints: IndexedSeq[Int]): Boolean =
-    sys.error("todo")
+  def ordered(ints: IndexedSeq[Int]): Boolean = {
+    case class rangeStats(min: Int, max: Int, is_ordered: Boolean)
+
+    def compareMonoid = new Monoid[Option[rangeStats]] {
+      def op(a1: Option[rangeStats], a2: Option[rangeStats]) = (a1, a2) match {
+        case (Some(rangeStats(lmin, lmax, lt)), Some(rangeStats(rmin, rmax, rt))) =>
+          Some(rangeStats(lmin, rmax, lt && rt && lmax <= rmin))
+        case (v, None) => v
+        case (None, v) => v
+      }
+
+      val zero = None
+    }
+
+    foldMapV(ints, compareMonoid)(i => Some(rangeStats(i, i, is_ordered = true))) match {
+      case Some(rangeStats(_, _, v)) => v
+      case _ => true
+    }
+  }
+
 
   sealed trait WC
 
@@ -119,12 +137,13 @@ object Monoid {
 
   def par[A](m: Monoid[A]): Monoid[Par[A]] = new Monoid[Par[A]] {
     val zero = Par.unit(m.zero)
+
     def op(a1: Par[A], a2: Par[A]) = a1.map2(a2)(m.op)
   }
 
   def parFoldMap[A, B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
     Par.parMap(v)(f).flatMap { s =>
-      foldMapV(s, par(m))((b:B) => Par.lazyUnit(b))
+      foldMapV(s, par(m))((b: B) => Par.lazyUnit(b))
     }
 
   val wcMonoid: Monoid[WC] = null // sys.error("todo")

@@ -46,38 +46,56 @@ class MonoidSpec extends FlatSpec with Matchers {
   "concatenate" should "concatenate a list of strings" in {
     val words = List("Hic", "Est", "Index")
 
-    Monoid.concatenate(words, Monoid.stringMonoid) should be ("HicEstIndex")
+    Monoid.concatenate(words, Monoid.stringMonoid) should be("HicEstIndex")
   }
 
   "foldMap" should "map and then fold using a monoid" in {
-    val numbers = List(123,456,789)
+    val numbers = List(123, 456, 789)
 
-    Monoid.foldMap(numbers,Monoid.stringMonoid)(_.toString) should be ("123456789")
+    Monoid.foldMap(numbers, Monoid.stringMonoid)(_.toString) should be("123456789")
   }
 
   "foldRight" should "be implemented via foldMap" in {
-    val l = List(1,2,3,4)
+    val l = List(1, 2, 3, 4)
 
-    Monoid.foldRight(l)(List[Int]())( _ :: _ ) should be (List(4,3,2,1))
+    Monoid.foldRight(l)(List[Int]())(_ :: _) should be(List(4, 3, 2, 1))
   }
 
   "foldLeft" should "be implemented via foldMap" in {
-    val l = List(1,2,3,4)
+    val l = List(1, 2, 3, 4)
 
-    Monoid.foldLeft(l)(List[Int]())((b,a) => a :: b ) should be (List(1,2,3,4))
+    Monoid.foldLeft(l)(List[Int]())((b, a) => a :: b) should be(List(1, 2, 3, 4))
   }
 
   "foldMapV" should "map and then fold using a monoid" in {
-    val numbers = List(1,2,3,4,5,6,7,8,9)
+    val numbers = List(1, 2, 3, 4, 5, 6, 7, 8, 9)
 
-    Monoid.foldMap(numbers,Monoid.stringMonoid)(_.toString) should be ("123456789")
+    Monoid.foldMap(numbers, Monoid.stringMonoid)(_.toString) should be("123456789")
   }
 
   "parFoldMap" should "map items in parallel" in {
-    val numbers = IndexedSeq(1,2,3,4,5,6,7,8,9)
+    val numbers = IndexedSeq(1, 2, 3, 4, 5, 6, 7, 8, 9)
 
     val es = Executors.newSingleThreadExecutor
 
-    Par.run(es)(Monoid.parFoldMap(numbers,Monoid.stringMonoid)(_.toString)) should be ("123456789")
+    Par.run(es)(Monoid.parFoldMap(numbers, Monoid.stringMonoid)(_.toString)) should be("123456789")
+  }
+
+  "numbers" should "be ordered" in {
+    val numbers = IndexedSeq(-100, -10, 3, 1000000, 444444444)
+
+    Monoid.ordered(numbers) should be(true)
+  }
+
+  "numbers" should "not be ordered" in {
+    val numbers = IndexedSeq(1, 2, 3, 5, 4, 6, 7)
+
+    Monoid.ordered(numbers) should not be true
+  }
+
+  "same numbers" should "be ordered" in {
+    val numbers = IndexedSeq(3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3)
+
+    Monoid.ordered(numbers) should be(true)
   }
 }
