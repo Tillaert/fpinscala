@@ -1,6 +1,9 @@
 package fpinscala.monoids
 
 
+import java.util.concurrent.Executors
+
+import fpinscala.parallelism.Nonblocking.Par
 import fpinscala.testing.{Gen, Prop}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -68,5 +71,13 @@ class MonoidSpec extends FlatSpec with Matchers {
     val numbers = List(1,2,3,4,5,6,7,8,9)
 
     Monoid.foldMap(numbers,Monoid.stringMonoid)(_.toString) should be ("123456789")
+  }
+
+  "parFoldMap" should "map items in parallel" in {
+    val numbers = IndexedSeq(1,2,3,4,5,6,7,8,9)
+
+    val es = Executors.newSingleThreadExecutor
+
+    Par.run(es)(Monoid.parFoldMap(numbers,Monoid.stringMonoid)(_.toString)) should be ("123456789")
   }
 }

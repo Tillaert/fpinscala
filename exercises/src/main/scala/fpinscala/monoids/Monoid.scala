@@ -115,11 +115,17 @@ object Monoid {
 
   case class Part(lStub: String, words: Int, rStub: String) extends WC
 
-  def par[A](m: Monoid[A]): Monoid[Par[A]] =
-    sys.error("todo")
+  import fpinscala.parallelism.Nonblocking._
+
+  def par[A](m: Monoid[A]): Monoid[Par[A]] = new Monoid[Par[A]] {
+    val zero = Par.unit(m.zero)
+    def op(a1: Par[A], a2: Par[A]) = a1.map2(a2)(m.op)
+  }
 
   def parFoldMap[A, B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
-    sys.error("todo")
+    Par.parMap(v)(f).flatMap { s =>
+      foldMapV(s, par(m))((b:B) => Par.lazyUnit(b))
+    }
 
   val wcMonoid: Monoid[WC] = null // sys.error("todo")
 
