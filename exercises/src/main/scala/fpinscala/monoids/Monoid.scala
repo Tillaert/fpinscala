@@ -51,17 +51,22 @@ object Monoid {
     val zero = (a:A) => a
   }
 
-
-  // TODO: Placeholder for `Prop`. Remove once you have implemented the `Prop`
-  // data type from Part 2.
-  trait Prop {}
-
-  // TODO: Placeholder for `Gen`. Remove once you have implemented the `Gen`
-  // data type from Part 2.
-
   import fpinscala.testing._
   import Prop._
-  def monoidLaws[A](m: Monoid[A], gen: Gen[A]): Prop = sys.error("todo")
+
+  object Eq {
+    implicit def equal[A](p1: A, p2: A)(in: Gen[A]): Prop =
+      forAll(in)(v => p1 )
+  }
+
+  def monoidLaws[A](m: Monoid[A], gen: Gen[A]): Prop =
+    forAll(for {
+      a <- gen
+      b <- gen
+      c <- gen
+    }yield(a,b,c))(p => m.op(m.op(p._1,p._2),p._3) == m.op(p._1,m.op(p._2,p._3))) &&
+    forAll(gen)(v => m.op(v,m.zero) == v) &&
+    forAll(gen)(v => m.op(m.zero, v) == v)
 
   def trimMonoid(s: String): Monoid[String] = sys.error("todo")
 

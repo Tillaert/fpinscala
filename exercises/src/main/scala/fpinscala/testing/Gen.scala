@@ -110,6 +110,8 @@ object Gen {
 
   def double: Gen[Double] = Gen(State(RNG.double))
 
+  def integer: Gen[Int] = Gen(State(RNG.int))
+
   def choose(lb: Int, ub: Int): Gen[Int] =
     Gen(State(RNG.nonNegativeInt).map((v: Int) => lb + v % (ub - lb)))
 
