@@ -8,6 +8,7 @@ import fpinscala.testing.{Gen, Prop}
 import org.scalatest.{FlatSpec, Matchers}
 
 class MonoidSpec extends FlatSpec with Matchers {
+
   import Monoid._
 
   "intAddition" should "obey monoid laws" in {
@@ -103,12 +104,41 @@ class MonoidSpec extends FlatSpec with Matchers {
 
 
   "wcMonoid" should "handle two parts" in {
-    wcMonoid.op(Part("fee", 2, "fi"), Part("fo", 3, "fum")) should be (Part("fee",6,"fum"))
-    wcMonoid.op(Part("fee", 2, "fi"), Stub("fo")) should be (Part("fee", 2, "fifo"))
-    wcMonoid.op(Stub("fo"), Part("fee", 2, "fi")) should be (Part("fofee", 2, "fi"))
-    wcMonoid.op(Stub("fo"), Stub("fi")) should be (Stub("fofi"))
-    wcMonoid.op(Part("fee", 2, ""), Part("fi", 3, "fo")) should be (Part("fee", 6, "fo"))
-    wcMonoid.op(Part("fee", 3, "fi"), Part("", 3, "fo")) should be (Part("fee", 7, "fo"))
-    wcMonoid.op(Part("fee", 3, ""), Part("", 3, "fum")) should be (Part("fee", 6, "fum"))
+    wcMonoid.op(Part("fee", 2, "fi"), Part("fo", 3, "fum")) should be(Part("fee", 6, "fum"))
+    wcMonoid.op(Part("fee", 2, "fi"), Stub("fo")) should be(Part("fee", 2, "fifo"))
+    wcMonoid.op(Stub("fo"), Part("fee", 2, "fi")) should be(Part("fofee", 2, "fi"))
+    wcMonoid.op(Stub("fo"), Stub("fi")) should be(Stub("fofi"))
+    wcMonoid.op(Part("fee", 2, ""), Part("fi", 3, "fo")) should be(Part("fee", 6, "fo"))
+    wcMonoid.op(Part("fee", 3, "fi"), Part("", 3, "fo")) should be(Part("fee", 7, "fo"))
+    wcMonoid.op(Part("fee", 3, ""), Part("", 3, "fum")) should be(Part("fee", 6, "fum"))
+  }
+
+  "wcMonoid" should "obey monoid laws" in {
+    // We could use a better Gen[WC]
+    Prop.run(Monoid.monoidLaws(Monoid.wcMonoid, Gen.integer.map(i => Part(i.toString, i, i.toString))))
+  }
+
+  "count" should """parse "lorem ipsum do" as 3""" in {
+    val str = "lorem ipsum do"
+
+    count(str) should be (3)
+  }
+
+  "count" should """parse "lor sit amet" as 3""" in {
+    val str = "lor sit amet"
+
+    count(str) should be (3)
+  }
+
+  "count" should "count 5 words" in {
+    val str = "lorem ipsum dolor ist amet, "
+
+    count(str) should be (5)
+  }
+
+  "count" should "count correctly" in {
+    count("") should be (0)
+    count(" ") should be (0)
+    count("f") should be (1)
   }
 }

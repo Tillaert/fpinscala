@@ -153,12 +153,28 @@ object Monoid {
       case (Stub(l), Part(ls, c, rs)) => Part(l + ls, c, rs)
       case (Part(ls, c, rs), Stub(r)) => Part(ls, c, rs + r)
       case (Part(lls, lc, lrs), Part(rls, rc, rrs)) =>
-        val stubs = if( (lrs + rls).isEmpty) 0 else 1
+        val stubs = if ((lrs + rls).isEmpty) 0 else 1
         Part(lls, lc + rc + stubs, rrs)
     }
   }
 
-  def count(s: String): Int = sys.error("todo")
+  def count(s: String): Int = {
+    def wc(c: Char): WC =
+      if (c.isWhitespace)
+        Part("", 0, "")
+      else
+        Stub(c.toString)
+
+    foldMapV(s.toIndexedSeq, wcMonoid)(wc) match {
+      case Part(l,c,r) =>
+        val lc = l.length min 1
+        val rc = r.length min 1
+        lc + rc + c
+      case Stub(c) if !c.isEmpty => 1
+      case _ => 0
+    }
+  }
+
 
   def productMonoid[A, B](A: Monoid[A], B: Monoid[B]): Monoid[(A, B)] =
     sys.error("todo")
