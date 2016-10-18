@@ -115,30 +115,46 @@ class MonoidSpec extends FlatSpec with Matchers {
 
   "wcMonoid" should "obey monoid laws" in {
     // We could use a better Gen[WC]
-    Prop.run(Monoid.monoidLaws(Monoid.wcMonoid, Gen.integer.map(i => Part(i.toString, i, i.toString))))
+    val g = Gen.boolean.flatMap(
+      b => if (b)
+        for {
+          c <- Gen.choose(0, 10)
+          s <- Gen.stringN(c) map (_.filter(!_.isWhitespace))
+        } yield Stub(s)
+      else
+        for {
+          lc <- Gen.choose(0, 4)
+          l <- Gen.stringN(lc) map (_.filter(!_.isWhitespace))
+          c <- Gen.integer
+          rc <- Gen.choose(0, 4)
+          r <- Gen.stringN(rc) map (_.filter(!_.isWhitespace))
+        } yield Part(l, c, r)
+    )
+
+    Prop.run(Monoid.monoidLaws(Monoid.wcMonoid, g))
   }
 
   "count" should """parse "lorem ipsum do" as 3""" in {
     val str = "lorem ipsum do"
 
-    count(str) should be (3)
+    count(str) should be(3)
   }
 
   "count" should """parse "lor sit amet" as 3""" in {
     val str = "lor sit amet"
 
-    count(str) should be (3)
+    count(str) should be(3)
   }
 
   "count" should "count 5 words" in {
     val str = "lorem ipsum dolor ist amet, "
 
-    count(str) should be (5)
+    count(str) should be(5)
   }
 
   "count" should "count correctly" in {
-    count("") should be (0)
-    count(" ") should be (0)
-    count("f") should be (1)
+    count("") should be(0)
+    count(" ") should be(0)
+    count("f") should be(1)
   }
 }
