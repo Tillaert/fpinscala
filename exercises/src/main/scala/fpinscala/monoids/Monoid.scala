@@ -126,7 +126,6 @@ object Monoid {
     }
   }
 
-
   sealed trait WC
 
   case class Stub(chars: String) extends WC
@@ -146,7 +145,18 @@ object Monoid {
       foldMapV(s, par(m))((b: B) => Par.lazyUnit(b))
     }
 
-  val wcMonoid: Monoid[WC] = null // sys.error("todo")
+  val wcMonoid: Monoid[WC] = new Monoid[WC] {
+    val zero = Stub("")
+
+    def op(a1: WC, a2: WC): WC = (a1, a2) match {
+      case (Stub(l), Stub(r)) => Stub(l + r)
+      case (Stub(l), Part(ls, c, rs)) => Part(l + ls, c, rs)
+      case (Part(ls, c, rs), Stub(r)) => Part(ls, c, rs + r)
+      case (Part(lls, lc, lrs), Part(rls, rc, rrs)) =>
+        val stubs = if( (lrs + rls).isEmpty) 0 else 1
+        Part(lls, lc + rc + stubs, rrs)
+    }
+  }
 
   def count(s: String): Int = sys.error("todo")
 

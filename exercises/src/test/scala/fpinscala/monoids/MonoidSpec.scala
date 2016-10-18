@@ -8,6 +8,8 @@ import fpinscala.testing.{Gen, Prop}
 import org.scalatest.{FlatSpec, Matchers}
 
 class MonoidSpec extends FlatSpec with Matchers {
+  import Monoid._
+
   "intAddition" should "obey monoid laws" in {
     Prop.run(Monoid.monoidLaws(Monoid.intAddition, Gen.integer))
   }
@@ -97,5 +99,16 @@ class MonoidSpec extends FlatSpec with Matchers {
     val numbers = IndexedSeq(3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3)
 
     Monoid.ordered(numbers) should be(true)
+  }
+
+
+  "wcMonoid" should "handle two parts" in {
+    wcMonoid.op(Part("fee", 2, "fi"), Part("fo", 3, "fum")) should be (Part("fee",6,"fum"))
+    wcMonoid.op(Part("fee", 2, "fi"), Stub("fo")) should be (Part("fee", 2, "fifo"))
+    wcMonoid.op(Stub("fo"), Part("fee", 2, "fi")) should be (Part("fofee", 2, "fi"))
+    wcMonoid.op(Stub("fo"), Stub("fi")) should be (Stub("fofi"))
+    wcMonoid.op(Part("fee", 2, ""), Part("fi", 3, "fo")) should be (Part("fee", 6, "fo"))
+    wcMonoid.op(Part("fee", 3, "fi"), Part("", 3, "fo")) should be (Part("fee", 7, "fo"))
+    wcMonoid.op(Part("fee", 3, ""), Part("", 3, "fum")) should be (Part("fee", 6, "fum"))
   }
 }
