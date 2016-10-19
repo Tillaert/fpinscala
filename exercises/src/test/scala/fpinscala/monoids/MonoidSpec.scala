@@ -198,4 +198,17 @@ class MonoidSpec extends FlatSpec with Matchers {
     OptionFoldable.foldRight(Some(5))("z")(f) should be("5z")
     OptionFoldable.foldRight(None)("z")(f) should be("z")
   }
+
+  "Monoid" should "product monoids" in {
+    val m = Monoid.productMonoid(Monoid.stringMonoid, Monoid.intMultiplication)
+
+    m.op(("2",3),("4",5)) should be (("24",15))
+
+    val g = for {
+      c <- Gen.stringN(1)
+      i <- Gen.integer
+    } yield(c,i)
+
+    Prop.run(Monoid.monoidLaws(m, g))
+  }
 }
