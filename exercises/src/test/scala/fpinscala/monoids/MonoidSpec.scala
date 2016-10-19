@@ -157,4 +157,26 @@ class MonoidSpec extends FlatSpec with Matchers {
     count(" ") should be(0)
     count("f") should be(1)
   }
+
+  "TreeFoldable" should "foldMap" in {
+    val tree = Branch(Branch(Leaf(3), Branch(Leaf(4), Leaf(5))), Branch(Leaf(7), Leaf(9)))
+
+    TreeFoldable.foldMap(tree)(_.toString)(stringMonoid) should be("34579")
+  }
+
+  "TreeFoldable" should "foldLeft" in {
+    val tree = Branch(Branch(Leaf(3), Branch(Leaf(4), Leaf(5))), Branch(Leaf(7), Leaf(9)))
+
+    def f(s: String, i: Int) = s + i.toString
+
+    TreeFoldable.foldLeft(tree)("z")(f) should be("z34579")
+  }
+
+  "TreeFoldable" should "foldRight" in {
+    val tree = Branch(Branch(Leaf(3), Branch(Leaf(4), Leaf(5))), Branch(Leaf(7), Leaf(9)))
+
+    def f(i: Int, s: String) = s + i.toString
+
+    TreeFoldable.foldRight(tree)("z")(f) should be("z97543")
+  }
 }
