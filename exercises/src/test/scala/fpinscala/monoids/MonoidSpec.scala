@@ -179,4 +179,23 @@ class MonoidSpec extends FlatSpec with Matchers {
 
     TreeFoldable.foldRight(tree)("z")(f) should be("z97543")
   }
+
+  "OptionFoldable" should "foldMap" in {
+    OptionFoldable.foldMap(Some(5))(_.toString)(stringMonoid) should be("5")
+    OptionFoldable.foldMap(None)(_.toString)(stringMonoid) should be("")
+  }
+
+  "OptionFoldable" should "foldLeft" in {
+    def f(a: String, b: Int) = a + b.toString
+
+    OptionFoldable.foldLeft(Some(5))("z")(f) should be("z5")
+    OptionFoldable.foldLeft(None)("z")(f) should be("z")
+  }
+
+  "OptionFoldable" should "foldRight" in {
+    def f(a: Int, b: String) = a.toString + b
+
+    OptionFoldable.foldRight(Some(5))("z")(f) should be("5z")
+    OptionFoldable.foldRight(None)("z")(f) should be("z")
+  }
 }
