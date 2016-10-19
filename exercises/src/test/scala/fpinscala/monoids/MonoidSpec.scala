@@ -202,13 +202,19 @@ class MonoidSpec extends FlatSpec with Matchers {
   "Monoid" should "product monoids" in {
     val m = Monoid.productMonoid(Monoid.stringMonoid, Monoid.intMultiplication)
 
-    m.op(("2",3),("4",5)) should be (("24",15))
+    m.op(("2", 3), ("4", 5)) should be(("24", 15))
 
     val g = for {
       c <- Gen.stringN(1)
       i <- Gen.integer
-    } yield(c,i)
+    } yield (c, i)
 
     Prop.run(Monoid.monoidLaws(m, g))
+  }
+
+  "Monoid.bag" should "do a wordcount" in {
+    val v = Vector("a", "rose", "is", "a", "rose")
+
+    bag(v) should be(Map("a" -> 2, "rose" -> 2, "is" -> 1))
   }
 }

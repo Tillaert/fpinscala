@@ -1,10 +1,9 @@
 package fpinscala.monoids
 
-import fpinscala.parallelism.Nonblocking._
 import fpinscala.parallelism.Nonblocking.Par.toParOps
 
 // infix syntax for `Par.map`, `Par.flatMap`, etc
-import language.higherKinds
+import scala.language.higherKinds
 
 trait Monoid[A] {
   def op(a1: A, a2: A): A
@@ -202,7 +201,7 @@ object Monoid {
     }
 
   def bag[A](as: IndexedSeq[A]): Map[A, Int] =
-    sys.error("todo")
+    foldMapV[A, Map[A, Int]](as, mapMergeMonoid(intAddition))((a: A) => Map(a -> 1))
 }
 
 trait Foldable[F[_]] {
