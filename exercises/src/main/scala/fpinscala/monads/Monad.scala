@@ -38,9 +38,11 @@ trait Monad[M[_]] extends Functor[M] {
   def map2[A, B, C](ma: M[A], mb: M[B])(f: (A, B) => C): M[C] =
     flatMap(ma)(a => map(mb)(b => f(a, b)))
 
-  def sequence[A](lma: List[M[A]]): M[List[A]] = ???
+  def sequence[A](lma: List[M[A]]): M[List[A]] =
+    lma.foldRight[M[List[A]]](unit(List[A]()))((a, b) => map2(a, b)(_ :: _))
 
-  def traverse[A, B](la: List[A])(f: A => M[B]): M[List[B]] = ???
+  def traverse[A, B](la: List[A])(f: A => M[B]): M[List[B]] =
+    la.foldRight[M[List[B]]](unit(List[B]()))((v, l) => map2(f(v), l)(_ :: _))
 
   def replicateM[A](n: Int, ma: M[A]): M[List[A]] = ???
 
@@ -73,25 +75,25 @@ object Monad {
   }
 
   def parserMonad[P[+ _]](p: Parsers[P]): Monad[P] = new Monad[P] {
-    def unit[A](a: A): P[A] = p.succeed(a)
+    def unit[A](a: => A): P[A] = p.succeed(a)
 
     def flatMap[A, B](ma: P[A])(f: A => P[B]): P[B] = p.flatMap(ma)(f)
   }
 
   val optionMonad: Monad[Option] = new Monad[Option] {
-    def unit[A](a: A): Option[A] = Some(a)
+    def unit[A](a: => A): Option[A] = Some(a)
 
     def flatMap[A, B](ma: Option[A])(f: A => Option[B]): Option[B] = ma flatMap f
   }
 
   val streamMonad: Monad[Stream] = new Monad[Stream] {
-    def unit[A](a: A): Stream[A] = Stream(a)
+    def unit[A](a: => A): Stream[A] = Stream(a)
 
     def flatMap[A, B](ma: Stream[A])(f: A => Stream[B]): Stream[B] = ma flatMap f
   }
 
   val listMonad: Monad[List] = new Monad[List] {
-    def unit[A](a: A): List[A] = List(a)
+    def unit[A](a: => A): List[A] = List(a)
 
     def flatMap[A, B](ma: List[A])(f: A => List[B]): List[B] = ma flatMap f
   }
