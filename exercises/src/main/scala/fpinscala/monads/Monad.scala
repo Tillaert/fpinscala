@@ -87,20 +87,28 @@ object Monad {
   val streamMonad: Monad[Stream] = new Monad[Stream] {
     def unit[A](a: A): Stream[A] = Stream(a)
 
-    def flatMap[A, B](ma: Stream[A])(f: A => Stream[B]) : Stream[B] = ma flatMap f
+    def flatMap[A, B](ma: Stream[A])(f: A => Stream[B]): Stream[B] = ma flatMap f
   }
 
   val listMonad: Monad[List] = new Monad[List] {
     def unit[A](a: A): List[A] = List(a)
 
-    def flatMap[A,B](ma: List[A])(f: A => List[B]) : List[B] = ma flatMap f
+    def flatMap[A, B](ma: List[A])(f: A => List[B]): List[B] = ma flatMap f
   }
-
-  def stateMonad[S] = ???
 
   val idMonad: Monad[Id] = ???
 
   def readerMonad[R] = ???
+}
+
+class StateMonads[S] {
+  type StateS[A] = State[S, A]
+
+  def stateMonad = new Monad[StateS] {
+    def unit[A](a: A) = State.unit(a)
+
+    def flatMap[A, B](ma: StateS[A])(f: A => StateS[B]) = ma flatMap f
+  }
 }
 
 case class Id[A](value: A) {
