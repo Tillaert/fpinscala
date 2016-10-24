@@ -129,7 +129,7 @@ class StateMonads[S] {
   type StateS[A] = State[S, A]
 
   def stateMonad = new Monad[StateS] {
-    def unit[A](a: A) = State.unit(a)
+    def unit[A](a: => A) = State.unit(a)
 
     def flatMap[A, B](ma: StateS[A])(f: A => StateS[B]) = ma flatMap f
   }
