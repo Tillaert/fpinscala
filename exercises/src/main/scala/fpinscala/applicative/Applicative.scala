@@ -16,8 +16,8 @@ trait Applicative[F[_]] extends Functor[F] {
   def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] =
     apply(map(fa)(f.curried))(fb)
 
-  def apply[A, B](fab: F[A => B])(fa: F[A]): F[B] =
-    map2(fab,fa)((ab,a) => ab(a))
+  def apply[A,B](fab: F[A => B])(fa: F[A]): F[B] =
+    map2(fab, fa)(_(_))
 
   def unit[A](a: => A): F[A]
 
@@ -71,7 +71,15 @@ trait Monad[F[_]] extends Applicative[F] {
 }
 
 object Monad {
-  def eitherMonad[E]: Monad[({type f[x] = Either[E, x]})#f] = ???
+  def eitherMonad[E] =
+    new Monad[({type f[x] = Either[E, x]})#f] {
+      def unit[A](a: => A):Either[E,A] = Right(a)
+    def flatMap[A,B](e: Either[E,A])(f: A => Either[E,A]) =
+      e match {
+        case Left(v) => Left(v)
+        case Right(a) => f(a)
+      }
+  }
 
   def stateMonad[S] = new Monad[({type f[x] = State[S, x]})#f] {
     def unit[A](a: => A): State[S, A] = State(s => (a, s))
