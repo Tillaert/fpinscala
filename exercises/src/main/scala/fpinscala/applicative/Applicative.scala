@@ -49,7 +49,15 @@ trait Applicative[F[_]] extends Functor[F] {
 
   def factor[A, B](fa: F[A], fb: F[B]): F[(A, B)] = ???
 
-  def product[G[_]](G: Applicative[G]): Applicative[({type f[x] = (F[x], G[x])})#f] = ???
+  def product[G[_]](G: Applicative[G]): Applicative[({type f[x] = (F[x], G[x])})#f] = {
+    val self = this
+    new Applicative[({type f[x] = (F[x], G[x])})#f] {
+      def unit[A](a: => A): (F[A], G[A]) = (self.unit(a), G.unit(a))
+
+      override def apply[A, B](fab: (F[(A) => B], G[(A) => B]))(fa: (F[A], G[A])): (F[B], G[B]) =
+        (self.apply(fab._1)(fa._1),G.apply(fab._2)(fa._2))
+    }
+  }
 
   def compose[G[_]](G: Applicative[G]): Applicative[({type f[x] = F[G[x]]})#f] = ???
 
@@ -127,7 +135,7 @@ object Applicative {
 
   type Const[A, B] = A
 
-  implicit def monoidApplicative[M](M: Monoid[M]) =
+  implicit def monoidApplicative[M](M: Monoid[M]) : Applicative[({type f[x] = Const[M, x]})#f] =
     new Applicative[({type f[x] = Const[M, x]})#f] {
       def unit[A](a: => A): M = M.zero
 
