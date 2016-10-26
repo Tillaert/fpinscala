@@ -56,12 +56,22 @@ trait Applicative[F[_]] extends Functor[F] {
       def apply[A, B](fab: (F[(A) => B], G[(A) => B]))(fa: (F[A], G[A])): (F[B], G[B]) =
         (self.apply(fab._1)(fa._1),G.apply(fab._2)(fa._2))
 
-      override def map[A, B](fa: (F[A], G[A]))(f: (A) => B): (F[B], G[B]) =
-        apply(unit(f))(fa)
+      override def map[A, B](fa: (F[A], G[A]))(f: (A) => B): (F[B], G[B]) = super.map(fa)(f)
     }
   }
 
-  def compose[G[_]](G: Applicative[G]): Applicative[({type f[x] = F[G[x]]})#f] = ???
+  def compose[G[_]](G: Applicative[G]): Applicative[({type f[x] = F[G[x]]})#f] = {
+    val self = this
+    new Applicative[({type f[x] = F[G[x]]})#f] {
+
+      override def unit[A](a: => A): F[G[A]] = self.unit(G.unit(a))
+
+      def map2[A, B, C](fa: F[G[A]], fb: F[G[B]])(f: (A, B) => C): F[G[C]] =
+        self.map2(fa,fb)(G.map2(_,_)(f))
+
+      override def map[A, B](fa: F[G[A]])(f: (A) => B): F[G[B]] = super.map(fa)(f)
+    }
+  }
 
   def sequenceMap[K, V](ofa: Map[K, F[V]]): F[Map[K, V]] = ???
 }
