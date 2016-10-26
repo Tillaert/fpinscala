@@ -16,8 +16,7 @@ trait Applicative[F[_]] extends Functor[F] {
   def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] =
     apply(map(fa)(f.curried))(fb)
 
-  def apply[A, B](fab: F[A => B])(fa: F[A]): F[B] =
-    map2(fab, fa)(_ (_))
+  def apply[A, B](fab: F[A => B])(fa: F[A]): F[B] = map2(fab, fa)(_ (_))
 
   def unit[A](a: => A): F[A]
 
@@ -54,8 +53,11 @@ trait Applicative[F[_]] extends Functor[F] {
     new Applicative[({type f[x] = (F[x], G[x])})#f] {
       def unit[A](a: => A): (F[A], G[A]) = (self.unit(a), G.unit(a))
 
-      override def apply[A, B](fab: (F[(A) => B], G[(A) => B]))(fa: (F[A], G[A])): (F[B], G[B]) =
+      def apply[A, B](fab: (F[(A) => B], G[(A) => B]))(fa: (F[A], G[A])): (F[B], G[B]) =
         (self.apply(fab._1)(fa._1),G.apply(fab._2)(fa._2))
+
+      override def map[A, B](fa: (F[A], G[A]))(f: (A) => B): (F[B], G[B]) =
+        apply(unit(f))(fa)
     }
   }
 
