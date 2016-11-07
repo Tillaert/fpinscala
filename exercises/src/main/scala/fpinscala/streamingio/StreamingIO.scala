@@ -334,7 +334,15 @@ input (`Await`) or signaling termination via `Halt`.
     /*
      * Exercise 2: Implement `count`.
      */
-    def count[I]: Process[I, Int] = ???
+    def count[I]: Process[I, Int] = {
+      def go(n:Int) : Process[I, Int] = {
+        Await {
+          case Some(v) => Emit(n, go(n+1))
+          case None => Halt()
+        }
+      }
+      go(0)
+    }
 
     /* For comparison, here is an explicit recursive implementation. */
     def count2[I]: Process[I, Int] = {
