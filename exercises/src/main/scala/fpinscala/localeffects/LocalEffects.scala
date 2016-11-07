@@ -127,9 +127,6 @@ object STArray {
 object Immutable {
   def noop[S] = ST[S,Unit](())
 
-  // An action that does nothing
-  def noop[S] = ST[S,Unit](())
-
   def partition[S](a: STArray[S,Int], l: Int, r: Int, pivot: Int): ST[S,Int] = for {
     vp <- a.read(pivot)
     _ <- a.swap(pivot, r)
