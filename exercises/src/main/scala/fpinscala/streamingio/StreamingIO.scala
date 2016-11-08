@@ -145,11 +145,11 @@ input (`Await`) or signaling termination via `Halt`.
      */
     def |>[O2](p2: Process[O, O2]): Process[I, O2] = p2 match {
       case Halt() => Halt()
-      case Emit(h,t) => Emit[I,O2](h, this |> p2)
+      case Emit(h, t) => Emit[I, O2](h, this |> p2)
       case Await(recv) => this match {
-        case Emit(h,t) => t |> recv(Some(h))
+        case Emit(h, t) => t |> recv(Some(h))
         case Halt() => Halt() |> recv(None)
-        case Await(recv2) => Await{(i) => recv2(i) |> p2}
+        case Await(recv2) => Await { (i) => recv2(i) |> p2 }
       }
     }
 
@@ -215,7 +215,8 @@ input (`Await`) or signaling termination via `Halt`.
     /*
      * Exercise 6: Implement `zipWithIndex`.
      */
-    def zipWithIndex: Process[I, (O, Int)] = ???
+    def zipWithIndex: Process[I, (O, Int)] =
+    this.zip(count)
 
     /* Add `p` to the fallback branch of this process */
     def orElse(p: Process[I, O]): Process[I, O] = this match {
@@ -379,13 +380,21 @@ input (`Await`) or signaling termination via `Halt`.
       loop(0.0)((i, s) => (i + s, i + s))
 
     def count3[I]: Process[I, Int] =
-      loop(0)((_,s) => (s+1, s+1))
+      loop(0)((_, s) => (s + 1, s + 1))
 
     /*
      * Exercise 7: Can you think of a generic combinator that would
      * allow for the definition of `mean` in terms of `sum` and
      * `count`?
      */
+
+    def zip[A, B, C](p1: Process[A, B], p2: Process[A, C]): Process[A, (B, C)] = (p1, p2) match {
+      case (Halt(), _) => Halt()
+      case (_, Halt()) => Halt()
+      case (Emit(lh, lt), Emit(rh, rt)) => Emit((lh, rh), zip(lt, rt))
+      case (Await(r), _) => Await((oa: Option[A]) => zip(r(oa), feed(oa)(p2)))
+      case (_, Await(r)) => Await((oa: Option[A]) => zip(feed(oa)(p1), r(oa)))
+    }
 
     def feed[A, B](oa: Option[A])(p: Process[A, B]): Process[A, B] =
       p match {
