@@ -455,6 +455,11 @@ input (`Await`) or signaling termination via `Halt`.
      * converts each temperature to celsius, and writes results to another file.
      */
 
+    def convertFahrenheit: Process[String,String] =
+      filter((line: String) => !line.startsWith("#")) |>
+        filter(line => line.trim.nonEmpty) |>
+        lift(line => toCelsius(line.toDouble).toString)
+
     def toCelsius(fahrenheit: Double): Double =
       (5.0 / 9.0) * (fahrenheit - 32.0)
   }
